@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    transition: background-color 0.5s ease;
+}
+
+#center-text {
+    font-size: 2rem;
+    margin-top: 50px;
+}
+
+button {
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    margin-top: 30px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: gray;
+}
