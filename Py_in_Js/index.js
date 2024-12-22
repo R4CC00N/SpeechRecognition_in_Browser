@@ -2,51 +2,65 @@ const { spawn } = require("child_process");
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-let listening = false;  // Estado de escucha (activo o no)
+let listening = false; // Estado de escucha
 
-app.use(express.static("public")); // Servir archivos estáticos en la carpeta 'public'
+app.use(express.static("public")); // Sirve archivos estáticos desde la carpeta 'public'
 
-// Cuando un cliente se conecta
+// Manejo de conexiones
 io.on("connection", (socket) => {
-    console.log("A user connected");
+    console.log("Cliente conectado");
 
-    // Cuando el cliente presiona el botón
+    let pythonProcess = null;
+
+    // Manejar el evento de "toggle-listening"
     socket.on("toggle-listening", (startListening) => {
         listening = startListening;
-        console.log("Listening: ", listening);
+        console.log("Listening:", listening);
 
-        // Si comienza la escucha, ejecutamos el script Python
         if (listening) {
-            startListeningProcess(socket);
+            pythonProcess = startListeningProcess(socket);
+        } else if (pythonProcess) {
+            pythonProcess.kill(); // Detener el proceso Python si se deja de escuchar
+            console.log("Proceso Python detenido");
         }
     });
 
     socket.on("disconnect", () => {
-        console.log("User disconnected");
+        console.log("Cliente desconectado");
+        if (pythonProcess) {
+            pythonProcess.kill(); // Asegurarse de terminar el proceso Python al desconectar
+        }
     });
 });
 
-// Función para iniciar la escucha (llama al script Python)
+// Función para iniciar el proceso de escucha
 function startListeningProcess(socket) {
     const pythonProcess = spawn("python", ["transcribe.py"]);
 
     pythonProcess.stdout.on("data", (data) => {
-        const transcription = data.toString().trim().toLowerCase();
+        const transcription = data.toString().trim();
         console.log("Transcription:", transcription);
-        socket.emit("transcription", transcription);  // Enviar transcripción al cliente
+        socket.emit("transcription", transcription); // Enviar transcripción al cliente
     });
 
     pythonProcess.stderr.on("data", (data) => {
         console.error(`Error: ${data.toString().trim()}`);
     });
+
+    pythonProcess.on("close", (code) => {
+        console.log(`Proceso Python finalizado con código ${code}`);
+    });
+
+    return pythonProcess;
 }
 
-// Iniciar el servidor en el puerto 3000
+// Iniciar servidor
 const PORT = 3000;
 server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
