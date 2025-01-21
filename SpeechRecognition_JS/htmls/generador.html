@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Objetos A-Frame</title>
+
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- Archivo JS con la lógica de los componentes -->
+    <script src="../js/generador.js" defer></script>
+    <!-- Archivo CSS para el estilo -->
+    <link rel="stylesheet" href="../css/generador.css">
+</head>
+<body>
+    <a-scene>
+        <!-- Cielo de fondo -->
+        <a-sky id="sky" color="#D3D3D3" sky-manager></a-sky>
+
+        <!-- Elemento de entrada interactivo -->
+        <a-box id="it" position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text clickable>
+            <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
+        </a-box>
+
+        <!-- Plano de texto para mostrar la transcripción en 3D -->
+        <a-plane position="0 0.5 -5" width="6" height="2" color="white" transcription-display="input: #it">
+            <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <!-- Cursor para interacción en dispositivos que no usan controladores -->
+        <a-entity cursor="rayOrigin: mouse" position="0 0 -3"></a-entity>
+
+        <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
+        <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
+
+        <!-- Controlador de mano izquierda -->
+        <a-entity laser-controls="hand: left"></a-entity>
+
+        <!-- Controlador de mano derecha -->
+        <a-entity laser-controls="hand: right"></a-entity>
+
+        <!-- Componente de manejo de comandos que escucha al elemento con ID "it" -->
+        <a-entity command-handler="input: #it"></a-entity>
+    </a-scene>
+</body>
+</html>

@@ -1,0 +1,36 @@
+/* General */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #FFF;
+    overflow: hidden;
+  }
+  
+  /* Información de debug (si se necesita) */
+  .debug-info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #FFF;
+    z-index: 1000;
+  }
+  
+  /* A-Frame Cursor */
+  a-cursor {
+    animation: cursor-pulse 1.5s infinite;
+  }
+  
+  @keyframes cursor-pulse {
+    0%, 100% {
+      scale: 1;
+    }
+    50% {
+      scale: 1.5;
+    }
+  }
+  

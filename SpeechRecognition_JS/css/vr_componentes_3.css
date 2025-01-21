@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+a-box {
+    transition: background-color 0.3s ease;
+}
+
+a-box:hover {
+    background-color: #6ca8b0;
+}
