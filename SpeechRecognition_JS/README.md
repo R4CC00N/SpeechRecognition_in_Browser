@@ -2,7 +2,10 @@
 
 ## Lista de Demos
 
-3. [Componentes de Realidad Virtual - Versión 2](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/vr_components_2.html)  
+4. [Componentes de Realidad Virtual - Versión 3](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/vr_componentes_3.html)  
+   Mejoramos la version 2 de la demo de componentes de realidad virtual, con características adicionales y ajustes en donde el trabajo se ve dividido en deteccion y transcripcion, muestra en pantalla, deteccion de comandos y ademas el componente que maneja comandos tiene entradas de datos.
+
+3. [Componentes de Realidad Virtual - Versión 2](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/vr_componentes_2.html)  
    Una iteración mejorada de la demo de componentes de realidad virtual, con características adicionales y ajustes en donde el trabajo se ve dividido en deteccion y transcripcion, muestra en pantalla, deteccion de comandos.
 
 2. [Componentes de Realidad Virtual - Versión 1](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/vr_components.html)  
