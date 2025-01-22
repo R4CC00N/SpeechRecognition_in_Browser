@@ -22,17 +22,18 @@
             <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
         </a-plane>
 
-        <!-- Cursor para interacción en dispositivos que no usan controladores -->
-        <a-entity cursor="rayOrigin: mouse" position="0 0 -3"></a-entity>
+
 
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
         <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
 
-        <!-- Controlador de mano izquierda -->
-        <a-entity laser-controls="hand: left"></a-entity>
-
-        <!-- Controlador de mano derecha -->
-        <a-entity laser-controls="hand: right"></a-entity>
+        <!--Cursor-->
+        <a-entity movement-controls="fly: false" position="0 0 -1">
+            <a-entity camera position="0 2 0" look-controls wasd-controls></a-entity>
+            <a-entity cursor="rayOrigin:mouse"></a-entity>
+            <a-entity laser-controls="hand: right"></a-entity>
+        </a-entity>
+  
 
         <!-- Componente de manejo de comandos que escucha al elemento con ID "it" -->
         <a-entity command-handler="input: #it"></a-entity>
