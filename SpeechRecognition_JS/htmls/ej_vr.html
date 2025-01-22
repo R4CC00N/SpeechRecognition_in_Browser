@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="../js/ej_vr.js"></script> <!-- Archivo JavaScript externo -->
+  </head>
+  <body>
+    <a-scene embedded vr-mode-ui="enabled: true" arjs>
+      <a-sky color="#D3D3D3"></a-sky>
+
+      <a-box id="grabadora" position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text>
+        <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
+      </a-box>
+
+      <a-plane position="0 0.5 -5" width="6" height="2" color="white">
+        <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+      </a-plane>
+
+      <a-entity cursor="rayOrigin: mouse" position="0 0 -3"></a-entity>
+    </a-scene>
+  </body>
+</html>
