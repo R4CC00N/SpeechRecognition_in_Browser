@@ -1,91 +1,93 @@
-// Componente de reconocimiento de voz
-AFRAME.registerComponent('input-text', {
-    init: function () {
-        var el = this.el;
-        var recognition;
-        var isRecording = false;
+    // Componente de reconocimiento de voz
+    AFRAME.registerComponent('input-text', {
+        schema: {
+        message: {type: 'string', default: 'comienza la grabacion!'},
+        event: {type: 'string', default: ''},
+        },
+        init: function () {
+            var el = this.el;
+            var recognition;
+            var isRecording = false;
 
-        // Verificar compatibilidad con la API de reconocimiento de voz
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
-            recognition.lang = 'es-ES';
-        } else {
-            console.error('API de reconocimiento de voz no soportada en este navegador');
-        }
-
-        // Función para convertir texto a números, incluyendo negativos
-        function convertirTextoANumero(texto) {
-            const mapaNumeros = {
-                'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
-                'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
-            };
-            texto = texto.toLowerCase();
-            return texto.replace(/\b(menos\s)?(\w+)\b/g, (match, menos, palabra) => {
-                const numero = mapaNumeros[palabra] !== undefined ? mapaNumeros[palabra] : isNaN(Number(palabra)) ? match : Number(palabra);
-                return menos ? -numero : numero;
-            });
-        }
-
-        // Actualizar el mensaje del usuario en la escena
-        function updateUserMessage(message) {
-            const messageElement = document.querySelector('#userMessage');
-            if (messageElement) {
-                messageElement.setAttribute('value', message);
-            }
-        }
-
-        // Iniciar/Detener grabación al hacer clic
-        el.addEventListener('click', () => {
-            if (!isRecording) {
-                if (recognition) {
-                    recognition.start();
-                    isRecording = true;
-                    updateUserMessage('Reconocimiento de voz iniciado...');
-                }
+            // Verificar compatibilidad con la API de reconocimiento de voz
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'es-ES';
             } else {
-                if (recognition) {
-                    recognition.stop();
-                    isRecording = false;
-                    updateUserMessage('Reconocimiento de voz detenido.');
+                console.error('API de reconocimiento de voz no soportada en este navegador');
+            }
+
+            // Función para convertir texto a números, incluyendo negativos
+            function convertirTextoANumero(texto) {
+                const mapaNumeros = {
+                    'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
+                    'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
+                };
+                texto = texto.toLowerCase();
+                return texto.replace(/\b(menos\s)?(\w+)\b/g, (match, menos, palabra) => {
+                    const numero = mapaNumeros[palabra] !== undefined ? mapaNumeros[palabra] : isNaN(Number(palabra)) ? match : Number(palabra);
+                    return menos ? -numero : numero;
+                });
+            }
+
+            // Actualizar el mensaje del usuario en la escena
+            function updateUserMessage(message) {
+                const messageElement = document.querySelector('#userMessage');
+                if (messageElement) {
+                    messageElement.setAttribute('value', message);
                 }
             }
-        });
 
-        // Cuando se recibe un resultado de la transcripción
-        if (recognition) {
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
+            // Iniciar/Detener grabación al hacer clic
+            el.addEventListener('click', () => {
+                if (!isRecording) {
+                    if (recognition) {
+                        recognition.start();
+                        isRecording = true;
+                        updateUserMessage('Reconocimiento de voz iniciado...');
+                    }
+                } else {
+                    if (recognition) {
+                        recognition.stop();
+                        isRecording = false;
+                        updateUserMessage('Reconocimiento de voz detenido.');
+                    }
                 }
+            });
 
-                // Convertir los números en el texto
-                transcript = convertirTextoANumero(transcript);
-                // Mostrar transcripción procesada en el HUD
-                //updateUserMessage(`Transcripción: ${transcript}`);
-                // Pasar la transcripción al siguiente componente
-                el.emit('transcription', { transcription: transcript });
-            };
+            // Cuando se recibe un resultado de la transcripción
+            if (recognition) {
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
 
-            recognition.onerror = (event) => {
-                console.error('Error en el reconocimiento de voz:', event.error);
-                updateUserMessage('Error en reconocimiento de voz.');
-            };
+                    // Convertir los números en el texto
+                    transcript = convertirTextoANumero(transcript);
+                    // Pasar la transcripción al siguiente componente
+                    el.emit('transcription', { transcription: transcript });
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Error en el reconocimiento de voz:', event.error);
+                    updateUserMessage('Error en reconocimiento de voz.');
+                };
+            }
         }
-    }
-});
+    });
 
-// Componente de manejo de comandos con entrada configurable
-AFRAME.registerComponent('command-handler', {
+    // Componente de manejo de comandos con entrada configurable
+    AFRAME.registerComponent('command-handler', {
     schema: {
-        input: { type: 'selector', default: null }, // Selector del elemento que genera eventos
+        input: { type: 'selector', default: null },
     },
 
     init: function () {
         const el = this.el;
-        const inputElement = this.data.input; // Elemento especificado como entrada
+        const inputElement = this.data.input;
         const scene = document.querySelector('a-scene');
         const components = ['cubo', 'esfera', 'plano', 'cilindro'];
         let currentCommand = null;
@@ -111,6 +113,8 @@ AFRAME.registerComponent('command-handler', {
             if (transcript.includes('crear')) {
                 currentCommand = 'crear';
                 updateUserMessage('Dime qué objeto crear (cubo, esfera, plano, cilindro)');
+                // Emitir evento para cambiar el color del cielo
+                scene.emit('enter-create-mode');
             } else if (currentCommand === 'crear' && components.some((comp) => transcript.includes(comp))) {
                 const objectType = components.find((comp) => transcript.includes(comp));
                 updateUserMessage(`Creando un ${objectType}. Ahora dime la posición x.`);
@@ -156,6 +160,8 @@ AFRAME.registerComponent('command-handler', {
                     entity.setAttribute('material', 'color: #FFC65D');
                     scene.appendChild(entity);
 
+                    // Emitir evento para restaurar el color del cielo
+                    scene.emit('exit-create-mode');
                     currentCommand = null;
                 }
             }
@@ -163,49 +169,51 @@ AFRAME.registerComponent('command-handler', {
     }
 });
 
-// Componente de visualización de transcripción
-AFRAME.registerComponent('transcription-display', {
-    schema: {
-        input: { type: 'selector', default: null }, // Selector del elemento que genera transcripciones
-    },
 
-    init: function () {
-        const el = this.el;
-        const inputElement = this.data.input;
+    // Componente de visualización de transcripción
+    AFRAME.registerComponent('transcription-display', {
+        schema: {
+            input: { type: 'selector', default: null }, // Selector del elemento que genera transcripciones
+        },
 
-        if (!inputElement) {
-            console.error('No se ha especificado un elemento de entrada para transcription-display');
-            return;
-        }
+        init: function () {
+            const el = this.el;
+            const inputElement = this.data.input;
 
-        // Escuchar eventos de transcripción desde el elemento especificado
-        inputElement.addEventListener('transcription', (event) => {
-            const transcript = event.detail.transcription;
-            const planeText = el.querySelector('a-text');
-
-            if (planeText) {
-                planeText.setAttribute('value', transcript);
-            } else {
-                console.warn('No se encontró a-text dentro de transcription-display para mostrar la transcripción');
+            if (!inputElement) {
+                console.error('No se ha especificado un elemento de entrada para transcription-display');
+                return;
             }
-        });
-    }
-});
-// Componente para manejar el fondo (sky)
-AFRAME.registerComponent('sky-manager', {
-    init: function () {
-        const el = this.el;
-        const scene = document.querySelector('a-scene');
 
-        // Cambiar el color del fondo al entrar/salir del modo creación
-        scene.addEventListener('enter-create-mode', () => {
-            el.setAttribute('material', 'color: #87CEEB'); // Color azul claro
-            console.log('Modo creación activado: color de fondo cambiado.');
-        });
+            // Escuchar eventos de transcripción desde el elemento especificado
+            inputElement.addEventListener('transcription', (event) => {
+                const transcript = event.detail.transcription;
+                const planeText = el.querySelector('#transcriptionText');
 
-        scene.addEventListener('exit-create-mode', () => {
-            el.setAttribute('material', 'color: #000000'); // Volver a color negro
-            console.log('Modo creación desactivado: color de fondo restaurado.');
-        });
-    }
-});
+                if (planeText) {
+                    planeText.setAttribute('value', transcript);
+                } else {
+                    console.warn('No se encontró a-text dentro de transcription-display para mostrar la transcripción');
+                }
+            });
+        }
+    });
+
+    // Componente para manejar el fondo (sky)
+    AFRAME.registerComponent('sky-manager', {
+        init: function () {
+            const el = this.el;
+            const scene = document.querySelector('a-scene');
+
+            // Cambiar el color del fondo al entrar/salir del modo creación
+            scene.addEventListener('enter-create-mode', () => {
+                el.setAttribute('material', 'color: #87CEEB'); // Color azul claro
+                console.log('Modo creación activado: color de fondo cambiado.');
+            });
+
+            scene.addEventListener('exit-create-mode', () => {
+                el.setAttribute('material', 'color:rgb(214, 214, 214)'); // Volver a color negro
+                console.log('Modo creación desactivado: color de fondo restaurado.');
+            });
+        }
+    });
