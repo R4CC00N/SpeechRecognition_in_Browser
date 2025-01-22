@@ -13,7 +13,7 @@
         <a-sky id="sky" color="#D3D3D3" sky-manager></a-sky>
 
         <!-- Elemento de entrada interactivo -->
-        <a-box id="it" position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text clickable>
+        <a-box id="it" position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" raycaster="objects: #it" class="clickable">
             <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
         </a-box>
 
@@ -22,18 +22,15 @@
             <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
         </a-plane>
 
-
-
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
         <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
 
-        <!--Cursor-->
+        <!-- Cursor y controladores VR -->
         <a-entity movement-controls="fly: false" position="0 0 -1">
             <a-entity camera position="0 2 0" look-controls wasd-controls></a-entity>
-            <a-entity cursor="rayOrigin:mouse"></a-entity>
-            <a-entity laser-controls="hand: right"></a-entity>
+            <a-entity cursor="rayOrigin: mouse"></a-entity>
+            <a-entity laser-controls="hand: right" cursor="fuse: true; rayOrigin: controller" ></a-entity>
         </a-entity>
-  
 
         <!-- Componente de manejo de comandos que escucha al elemento con ID "it" -->
         <a-entity command-handler="input: #it"></a-entity>
@@ -41,3 +38,4 @@
 
 </body>
 </html>
+
