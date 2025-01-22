@@ -2,6 +2,9 @@
 
 ## Lista de Demos
 
+5. [Intento de accion en VR](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/ej_vr.html)  
+   Intento de accion por medio del uso de las gafas y sus mandos.
+
 4. [Componentes de Realidad Virtual - Versión 3](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/vr_componentes_3.html)  
    Mejoramos la version 2 de la demo de componentes de realidad virtual, con características adicionales y ajustes en donde el trabajo se ve dividido en deteccion y transcripcion, muestra en pantalla, deteccion de comandos y ademas el componente que maneja comandos tiene entradas de datos.
 
