@@ -106,7 +106,7 @@
     
             inputElement.addEventListener('transcription', (event) => {
                 const transcript = event.detail.transcription.toLowerCase();
-                console.log('Comando recibido:', transcript);
+                console.log('Comando recibido Manejador:', transcript);
     
                 if (transcript.includes('crear')) {
                     currentCommand = 'crear';
@@ -158,7 +158,8 @@
         }
     });
 
-    // Componente para crear objetos
+
+// Componente para crear objetos
 AFRAME.registerComponent('object-creator', {
     schema: {
         input: { type: 'selector', default: null },
@@ -166,40 +167,116 @@ AFRAME.registerComponent('object-creator', {
 
     init: function () {
         const scene = document.querySelector('a-scene');
+        let currentObject = null; // Para almacenar referencia al objeto creado
 
+        // Escuchar inicio de creación del objeto
         scene.addEventListener('start-object-creation', (event) => {
             const objectType = event.detail.type;
             console.log(`Creando objeto: ${objectType}`);
+            if (objectType === 'cubo') {
+                // Crear cubo con valores predeterminados
+                const entity = document.createElement('a-entity');
+                entity.setAttribute('geometry', 'primitive: box; height: 1; width: 1; depth: 1');
+                entity.setAttribute('position', '0 5 -13');
+                entity.setAttribute('material', 'color: #FFC65D');
+                entity.setAttribute('id', 'dynamic-object'); // ID único para modificarlo después
+                scene.appendChild(entity);
+                currentObject = entity;
+            } else {
+                console.log(`Tipo de objeto no soportado: ${objectType}`);
+            }
+        });
 
-            const entity = document.createElement('a-entity');
-            let geometry = {};
-
-            switch (objectType) {
-                case 'cubo':
-                    geometry = { primitive: 'box', height: 1, width: 1, depth: 1 };
-                    break;
-                case 'esfera':
-                    geometry = { primitive: 'sphere', radius: 2.5 };
-                    break;
-                case 'plano':
-                    geometry = { primitive: 'plane', height: 1, width: 7 };
-                    break;
-                case 'cilindro':
-                    geometry = { primitive: 'cylinder', height: 4, radius: 0.5 };
-                    break;
-                default:
-                    console.error(`Tipo de objeto no soportado: ${objectType}`);
-                    return;
+        // Escuchar comandos para modificar el cubo ya creado
+        scene.addEventListener('modify-object', (event) => {
+            if (!currentObject) {
+                console.warn('No hay un objeto activo para modificar.');
+                return;
             }
 
-            entity.setAttribute('geometry', geometry);
-            entity.setAttribute('position', '0 5 -13');
-            entity.setAttribute('rotation', '0 0 90');
-            entity.setAttribute('material', 'color:rgb(255, 0, 0)');
-            scene.appendChild(entity);
+            const { attribute, value } = event.detail;
+            if (attribute === 'position') {
+                currentObject.setAttribute('position', value);
+                console.log(`Posición del cubo actualizada a: ${value}`);
+            } else if (attribute === 'geometry') {
+                currentObject.setAttribute('geometry', value);
+                console.log(`Geometría del cubo actualizada a: ${JSON.stringify(value)}`);
+            } else if (attribute === 'material') {
+                currentObject.setAttribute('material', `color: ${value}`);
+                console.log(`Color del cubo actualizado a: ${value}`);
+            } else {
+                console.warn(`Atributo desconocido: ${attribute}`);
+            }
         });
     },
 });
+
+// Componente de comandos dinámicos para modificar atributos
+AFRAME.registerComponent('dynamic-modifier', {
+    schema: {
+        input: { type: 'selector', default: null },
+    },
+
+    init: function () {
+        const inputElement = this.data.input;
+        const scene = document.querySelector('a-scene');
+        let modifyingObject = false;
+
+        if (!inputElement) {
+            console.error('No se ha especificado un elemento de entrada para dynamic-modifier');
+            return;
+        }
+
+        const parseCommand = (transcript) => {
+            const command = {};
+            if (transcript.includes('posición')) {
+                const posMatch = transcript.match(/x\s*(-?\d+).*y\s*(-?\d+).*z\s*(-?\d+)/i);
+                if (posMatch) {
+                    command.attribute = 'position';
+                    command.value = `${posMatch[1]} ${posMatch[2]} ${posMatch[3]}`;
+                }
+            } else if (transcript.includes('tamaño')) {
+                const sizeMatch = transcript.match(/alto\s*(\d+).*ancho\s*(\d+).*profundo\s*(\d+)/i);
+                if (sizeMatch) {
+                    command.attribute = 'geometry';
+                    command.value = `height: ${sizeMatch[1]}; width: ${sizeMatch[2]}; depth: ${sizeMatch[3]}`;
+                }
+            } else if (transcript.includes('color')) {
+                const colorMatch = transcript.match(/color\s*(\w+)/i);
+                if (colorMatch) {
+                    command.attribute = 'material';
+                    command.value = colorMatch[1];
+                }
+            }
+            return command;
+        };
+
+        inputElement.addEventListener('transcription', (event) => {
+            const transcript = event.detail.transcription.toLowerCase();
+            console.log('Comando recibido:', transcript);
+
+            // Activar modificación de objeto
+            if (transcript.includes('editar')) {
+                modifyingObject = true;
+                console.log('Modificación del cubo activada.');
+                return;
+            }
+
+            // Procesar comandos solo si estamos en modo modificación
+            if (modifyingObject) {
+                const command = parseCommand(transcript);
+                if (command.attribute && command.value) {
+                    scene.emit('modify-object', command);
+                    console.log(`Ejecutando comando: ${JSON.stringify(command)}`);
+                } else if (transcript.includes('terminar')) {
+                    modifyingObject = false;
+                    console.log('Modificación del cubo finalizada.');
+                }
+            }
+        });
+    },
+});
+
     
     // Componente para manejar el fondo (sky)
     AFRAME.registerComponent('sky-manager', {
@@ -209,7 +286,7 @@ AFRAME.registerComponent('object-creator', {
 
             // Cambiar el color del fondo al entrar/salir del modo creación
             scene.addEventListener('enter-create-mode', () => {
-                el.setAttribute('material', 'color: #87CEEB'); // Color azul claro
+                el.setAttribute('material', 'color:rgb(201, 224, 158)'); // Color azul claro
                 console.log('Modo creación activado: color de fondo cambiado.');
             });
             scene.addEventListener('end-create-mode', () => {

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>A-Frame VR Scene</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="../js/generador.js"></script> <!-- Archivo JavaScript externo -->
+    <script src="../js/generador_v2.js"></script> <!-- Archivo JavaScript externo -->
     <link rel="stylesheet" href="../css/generador.css"> <!-- Archivo CSS externo -->
 </head>
 <body>
@@ -35,7 +35,9 @@
 
         <!-- Componente de manejo de comandos que escucha al elemento con ID "voiceInputBox" -->
         <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>
-        <a-entity object-creator="input: #create"></a-entity>
+        <a-entity id="object" object-creator="input: #create"></a-entity>
+        <!-- Componente dynamic-modifier para manejar modificaciones dinámicas -->
+        <a-entity id="dynamic-modifier" dynamic-modifier="input: #voiceInputBox"></a-entity>
     </a-scene>
 </body>
 </html>
