@@ -34,12 +34,11 @@
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
         <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
 
-        <!-- Cursor y controladores VR -->
+        <!--Cursor-->
         <a-entity movement-controls="fly: false" position="0 0 -1">
-            <a-entity camera position="0 2 0" look-controls wasd-controls></a-entity>
+            <a-entity camera position="30 1.6 25" look-controls wasd-controls></a-entity>
             <a-entity cursor="rayOrigin:mouse"></a-entity>
-            <a-entity laser-controls="hand: right"></a-entity>
-          </a-entity>
+        </a-entity>
 
         <!-- Componente de manejo de comandos que escucha al elemento con ID "voiceInputBox" -->
         <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>
