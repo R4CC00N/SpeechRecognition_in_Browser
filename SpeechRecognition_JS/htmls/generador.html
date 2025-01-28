@@ -14,7 +14,7 @@
         <!-- Cielo de fondo -->
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
 
-        <a-entity environment="preset: japan; groundColor: #445; grid: cross"></a-entity>
+        <a-entity position="0 -10 0" environment="preset: japan; groundColor: #445; grid: cross"></a-entity>
 
         <!-- Elemento de entrada interactivo con input-text -->
         <a-box id="voiceInputBox"
@@ -40,7 +40,7 @@
 
         <!-- Cursor y controladores VR -->
         <a-entity movement-controls="fly: false" position="0 0 -1">
-            <a-entity camera position="0 2 10" look-controls wasd-controls></a-entity>
+            <a-entity camera position="0 1aw 10" look-controls wasd-controls></a-entity>
             <a-entity cursor="rayOrigin:mouse"></a-entity>
             <a-entity laser-controls="hand: right"></a-entity>
           </a-entity>
