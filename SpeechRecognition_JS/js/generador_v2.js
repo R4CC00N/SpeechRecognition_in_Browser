@@ -179,8 +179,10 @@ AFRAME.registerComponent('object-creator', {
                 entity.setAttribute('geometry', 'primitive: box; height: 1; width: 1; depth: 1');
                 entity.setAttribute('position', '0 5 -13');
                 entity.setAttribute('material', 'color: #FFC65D');
-                entity.setAttribute('id', 'dynamic-object'); // ID único para modificarlo después
+                entity.setAttribute('class', 'dynamic-object'); // ID único para modificarlo después
                 scene.appendChild(entity);
+                // detecta una palabra 
+
                 currentObject = entity;
             } else {
                 console.log(`Tipo de objeto no soportado: ${objectType}`);

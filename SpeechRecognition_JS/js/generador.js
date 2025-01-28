@@ -8,7 +8,7 @@
             var el = this.el;
             var recognition;
             var isRecording = false;
-
+            const scene = document.querySelector('#main');
             // Verificar compatibilidad con la API de reconocimiento de voz
             if ('webkitSpeechRecognition' in window) {
                 recognition = new webkitSpeechRecognition();
@@ -88,7 +88,7 @@
         init: function () {
             const el = this.el;
             const inputElement = this.data.input;
-            const scene = document.querySelector('a-scene');
+            const scene = document.querySelector('#main');
             const components = ['cubo', 'esfera', 'plano', 'cilindro'];
             let currentCommand = null;
     

@@ -13,7 +13,10 @@
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
 
         <!-- Elemento de entrada interactivo con input-text -->
-        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text>
+        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"             
+        animation="startEvents: click; property: scale;
+        from: 2 2 2; to: 1 1 1; dur: 1000"
+        input-text="event: click">
             <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
         </a-box>
 
