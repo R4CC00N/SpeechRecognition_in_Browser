@@ -13,7 +13,13 @@
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
 
         <!-- Elemento de entrada interactivo con input-text -->
-        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" 
+        <a-box id="voiceInputBox"
+            position="0 -0.5 -3"
+            depth="0.15"
+            height="0.25"
+            width="2"
+            color="#8ec3d0"
+            class="clickable"
             animation="startEvents: click; property: scale;
             from: 2 2 2; to: 1 1 1; dur: 1000"
             input-text="event: click">
@@ -28,12 +34,22 @@
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
         <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
 
-        <!-- Cursor y controladores VR -->
-        <a-entity movement-controls="fly: false" position="0 0 -1">
-            <a-entity camera position="0 2 0" look-controls wasd-controls></a-entity>
-            <a-entity cursor="rayOrigin:mouse"></a-entity>
-            <a-entity laser-controls="hand: right"></a-entity>
-          </a-entity>
+        <!-- Cursor y controladores VR/AR -->
+        <a-entity position="0 1.6 0">
+            <a-camera wasd-controls look-controls>
+                <a-entity
+                    cursor="rayOrigin: mouse; fuse: false"
+                    raycaster="objects: .clickable"
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    material="color: white; shader: flat">
+                </a-entity>
+            </a-camera>
+        </a-entity>
+
+        <!-- Controladores VR para interacción -->
+        <a-entity laser-controls="hand: right"></a-entity>
+        <a-entity laser-controls="hand: left"></a-entity>
 
         <!-- Componente de manejo de comandos que escucha al elemento con ID "voiceInputBox" -->
         <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>

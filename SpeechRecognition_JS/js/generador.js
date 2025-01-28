@@ -1,84 +1,76 @@
-    // Componente de reconocimiento de voz
-    AFRAME.registerComponent('input-text', {
-        schema: {
-        message: {type: 'string', default: 'comienza la grabacion!'},
-        event: {type: 'string', default: ''},
-        },
-        init: function () {
-            var el = this.el;
-            var recognition;
-            var isRecording = false;
-            const scene = document.querySelector('#main');
-            // Verificar compatibilidad con la API de reconocimiento de voz
-            if ('webkitSpeechRecognition' in window) {
-                recognition = new webkitSpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = false;
-                recognition.lang = 'es-ES';
-            } else {
-                console.error('API de reconocimiento de voz no soportada en este navegador');
-            }
+// Componente de reconocimiento de voz
+AFRAME.registerComponent('input-text', {
+    schema: {
+        message: { type: 'string', default: 'Comienza la grabación!' },
+        event: { type: 'string', default: '' },
+    },
+    init: function () {
+        const el = this.el;
+        let recognition;
+        let isRecording = false;
 
-            // Función para convertir texto a números, incluyendo negativos
-            function convertirTextoANumero(texto) {
-                const mapaNumeros = {
-                    'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
-                    'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
-                };
-                texto = texto.toLowerCase();
-                return texto.replace(/\b(menos\s)?(\w+)\b/g, (match, menos, palabra) => {
-                    const numero = mapaNumeros[palabra] !== undefined ? mapaNumeros[palabra] : isNaN(Number(palabra)) ? match : Number(palabra);
-                    return menos ? -numero : numero;
-                });
-            }
 
-            // Actualizar el mensaje del usuario en la escena
-            function updateUserMessage(message) {
-                const messageElement = document.querySelector('#userMessage');
-                if (messageElement) {
-                    messageElement.setAttribute('value', message);
-                }
-            }
+        // Verificar compatibilidad con la API de reconocimiento de voz
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'es-ES';
+        } else {
+            console.error('API de reconocimiento de voz no soportada en este navegador');
+        }
 
-            // Iniciar/Detener grabación al hacer clic
-            el.addEventListener('click', () => {
-                if (!isRecording) {
-                    if (recognition) {
-                        recognition.start();
-                        isRecording = true;
-                        updateUserMessage('Reconocimiento de voz iniciado...');
-                    }
-                } else {
-                    if (recognition) {
-                        recognition.stop();
-                        isRecording = false;
-                        updateUserMessage('Reconocimiento de voz detenido.');
-                        scene.emit('exit-create-mode');
-                    }
-                }
-            });
-
-            // Cuando se recibe un resultado de la transcripción
-            if (recognition) {
-                recognition.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        transcript += event.results[i][0].transcript;
-                    }
-
-                    // Convertir los números en el texto
-                    transcript = convertirTextoANumero(transcript);
-                    // Pasar la transcripción al siguiente componente
-                    el.emit('transcription', { transcription: transcript });
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Error en el reconocimiento de voz:', event.error);
-                    updateUserMessage('Error en reconocimiento de voz.');
-                };
+        // Actualizar el mensaje del usuario en la escena
+        function updateUserMessage(message) {
+            const messageElement = document.querySelector('#userMessage');
+            if (messageElement) {
+                messageElement.setAttribute('value', message);
             }
         }
-    });
+
+        // Iniciar/Detener grabación al hacer clic
+        el.addEventListener('click', () => {
+            if (!isRecording) {
+                if (recognition) {
+                    recognition.start();
+                    isRecording = true;
+                    updateUserMessage('Reconocimiento de voz iniciado...');
+                    el.setAttribute('color', '#4CAF50');
+                }
+            } else {
+                if (recognition) {
+                    recognition.stop();
+                    isRecording = false;
+                    updateUserMessage('Reconocimiento de voz detenido.');
+                    el.setAttribute('color','#FF6B6B');
+                }
+            }
+        });
+
+        // Cuando se recibe un resultado de la transcripción
+        if (recognition) {
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                console.log('Transcripción:', transcript);
+
+                // Actualizar el texto en la escena
+                const transcriptionText = document.querySelector('#transcriptionText');
+                if (transcriptionText) {
+                    transcriptionText.setAttribute('value', transcript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Error en el reconocimiento de voz:', event.error);
+                updateUserMessage('Error en reconocimiento de voz.');
+            };
+        }
+    }
+});
+
 
     AFRAME.registerComponent('command-handler', {
         schema: {
