@@ -1,4 +1,3 @@
-// Componente de reconocimiento de voz
 AFRAME.registerComponent('input-text', {
     schema: {
         message: { type: 'string', default: 'Comienza la grabación!' },
@@ -8,7 +7,8 @@ AFRAME.registerComponent('input-text', {
         const el = this.el;
         let recognition;
         let isRecording = false;
-        var data = this.data;  // Component property values.
+        const data = this.data;
+
         // Verificar compatibilidad con la API de reconocimiento de voz
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -17,9 +17,9 @@ AFRAME.registerComponent('input-text', {
             recognition.lang = 'es-ES';
         } else {
             console.error('API de reconocimiento de voz no soportada en este navegador');
+            return;
         }
 
-        
         // Función para convertir texto a números, incluyendo negativos
         function convertirTextoANumero(texto) {
             const mapaNumeros = {
@@ -33,36 +33,24 @@ AFRAME.registerComponent('input-text', {
             });
         }
 
-        
+        // Manejar el evento especificado en el atributo event
         if (data.event) {
-            // This will log the `message` when the entity emits the `event`.
             el.addEventListener(data.event, function () {
-                //updateUserMessage('Reconocimiento de voz iniciado...');
                 console.log(data.message);
                 if (!isRecording) {
-                    if (recognition) {
-                        recognition.start();
-                        isRecording = true;
-                        updateUserMessage('Reconocimiento de voz iniciado...');
-                        el.setAttribute('color', '#4CAF50');
-                    }
+                    recognition.start();
+                    isRecording = true;
+                    updateUserMessage('Reconocimiento de voz iniciado...');
+                    el.setAttribute('color', '#4CAF50');
                 } else {
-                    if (recognition) {
-                        recognition.stop();
-                        isRecording = false;
-                        updateUserMessage('Reconocimiento de voz detenido.');
-                        el.setAttribute('color','#FF6B6B');
-                    }
-                }w
+                    recognition.stop();
+                    isRecording = false;
+                    updateUserMessage('Reconocimiento de voz detenido.');
+                    el.setAttribute('color', '#FF6B6B');
+                }
             });
-          } 
-          else {
-            // `event` not specified, just log the message.
-            console.log(data.message);
+        }
 
-          };
-
-          
         // Actualizar el mensaje del usuario en la escena
         function updateUserMessage(message) {
             const messageElement = document.querySelector('#userMessage');
@@ -72,24 +60,20 @@ AFRAME.registerComponent('input-text', {
         }
 
         // Cuando se recibe un resultado de la transcripción
-        if (recognition) {
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    transcript += event.results[i][0].transcript;
-                }
-                console.log('Transcripción:', transcript);
-                transcript = convertirTextoANumero(transcript);
-                // Actualizar el texto en la escena
-                el.emit('transcription', { transcription: transcript });
-            };
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            console.log('Transcripción:', transcript);
+            transcript = convertirTextoANumero(transcript);
+            el.emit('transcription', { transcription: transcript });
+        };
 
-            recognition.onerror = (event) => {
-                console.error('Error en el reconocimiento de voz:', event.error);
-                updateUserMessage('Error en reconocimiento de voz.');
-            };
-        }
-        
+        recognition.onerror = (event) => {
+            console.error('Error en el reconocimiento de voz:', event.error);
+            updateUserMessage('Error en reconocimiento de voz.');
+        };
     }
 });
 
