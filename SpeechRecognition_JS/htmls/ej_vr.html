@@ -1,31 +1,85 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A-Frame Escena Interactiva con Raycaster Invisible</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   </head>
   <body>
     <a-scene>
-      <!-- Cielo y entorno -->
-      <a-sky color="#D3D3D3"></a-sky>
+      <!-- Ambiente -->
+      <a-sky color="#ECECEC"></a-sky>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
 
-      <!-- Botón interactivo para iniciar/detener reconocimiento -->
-      <a-box id="grabadora" position="0 0.25 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text = "startEvents: click">
-        <a-text value="Pulsa para grabar" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
-      </a-box>
+      <!-- Botón Interactivo -->
+      <a-box 
+        id="boton"
+        position="0 1.5 -3"
+        rotation="0 45 0"
+        width="1"
+        height="1"
+        depth="1"
+        color="#4CAF50"
+        animation="property: rotation; to: 0 405 0; dur: 2000; easing: easeInOutQuad; loop: true"
+        class="clickable"
+      ></a-box>
 
-      <!-- Plano para mostrar texto -->
-      <a-plane position="0 0.5 -3" width="6" height="2" color="white">
-        <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
-      </a-plane>
+      <!-- Cámara y controles -->
+      <a-entity position="0 1.6 0">
+        <!-- Cámara principal con raycaster -->
+        <a-camera look-controls wasd-controls>
+          <a-entity
+            cursor="fuse: false"
+            raycaster="objects: .clickable; showLine: false"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+            material="color: white; shader: flat"
+          ></a-entity>
+        </a-camera>
+      </a-entity>
 
-      <a-entity movement-controls="fly: false" position="0 0 0">
-        <a-entity camera position="0 1.6 0" look-controls wasd-controls></a-entity>
-        <a-entity cursor="rayOrigin:mouse"></a-entity>
-        <a-entity laser-controls="hand: right"></a-entity>
+      <!-- Controladores VR con raycasters invisibles -->
+      <a-entity oculus-touch-controls="hand: left">
+        <a-entity
+          raycaster="objects: .clickable; showLine: false"
+        ></a-entity>
+      </a-entity>
+      <a-entity oculus-touch-controls="hand: right">
+        <a-entity
+          raycaster="objects: .clickable; showLine: false"
+        ></a-entity>
       </a-entity>
     </a-scene>
+
+    <script>
+      AFRAME.registerComponent('button-handler', {
+        init: function() {
+          let estaActivo = false;
+
+          // Manejo de clics en el botón
+          this.el.addEventListener('click', function() {
+            estaActivo = !estaActivo;
+            this.setAttribute('color', estaActivo ? '#FF6B6B' : '#4CAF50');
+            console.log('Botón presionado! Estado:', estaActivo ? 'Activado' : 'Desactivado');
+          });
+
+          // Feedback visual al apuntar
+          this.el.addEventListener('raycaster-intersected', function() {
+            this.setAttribute('material', 'opacity', 0.7);
+          });
+
+          this.el.addEventListener('raycaster-intersected-cleared', function() {
+            this.setAttribute('material', 'opacity', 1.0);
+          });
+        }
+      });
+
+      // Inicializar el componente en el botón
+      document.addEventListener('DOMContentLoaded', function() {
+        const boton = document.querySelector('#boton');
+        boton.setAttribute('button-handler', '');
+      });
+    </script>
   </body>
 </html>
