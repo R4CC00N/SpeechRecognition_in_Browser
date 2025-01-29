@@ -8,8 +8,8 @@ AFRAME.registerComponent('input-text', {
         const el = this.el;
         let recognition;
         let isRecording = false;
-
-
+        var data = this.data;  // Component property values.
+        
         // Verificar compatibilidad con la API de reconocimiento de voz
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -19,7 +19,19 @@ AFRAME.registerComponent('input-text', {
         } else {
             console.error('API de reconocimiento de voz no soportada en este navegador');
         }
-
+        
+        if (data.event) {
+            // This will log the `message` when the entity emits the `event`.
+            el.addEventListener(data.event, function () {
+                updateUserMessage('Reconocimiento de voz iniciado...');
+                console.log(data.message);
+            });
+          } 
+          else {
+            // `event` not specified, just log the message.
+            console.log(data.message);
+            updateUserMessage('Reconocimiento de voz detenido.');
+          };
         // Actualizar el mensaje del usuario en la escena
         function updateUserMessage(message) {
             const messageElement = document.querySelector('#userMessage');
@@ -34,14 +46,14 @@ AFRAME.registerComponent('input-text', {
                 if (recognition) {
                     recognition.start();
                     isRecording = true;
-                    updateUserMessage('Reconocimiento de voz iniciado...');
+                    // updateUserMessage('Reconocimiento de voz iniciado...');
                     el.setAttribute('color', '#4CAF50');
                 }
             } else {
                 if (recognition) {
                     recognition.stop();
                     isRecording = false;
-                    updateUserMessage('Reconocimiento de voz detenido.');
+                    //updateUserMessage('Reconocimiento de voz detenido.');
                     el.setAttribute('color','#FF6B6B');
                 }
             }
@@ -68,6 +80,7 @@ AFRAME.registerComponent('input-text', {
                 updateUserMessage('Error en reconocimiento de voz.');
             };
         }
+        
     }
 });
 
