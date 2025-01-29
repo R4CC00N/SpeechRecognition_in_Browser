@@ -9,7 +9,6 @@ AFRAME.registerComponent('input-text', {
         let recognition;
         let isRecording = false;
         var data = this.data;  // Component property values.
-        
         // Verificar compatibilidad con la API de reconocimiento de voz
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -19,19 +18,51 @@ AFRAME.registerComponent('input-text', {
         } else {
             console.error('API de reconocimiento de voz no soportada en este navegador');
         }
+
+        
+        // Función para convertir texto a números, incluyendo negativos
+        function convertirTextoANumero(texto) {
+            const mapaNumeros = {
+                'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
+                'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
+            };
+            texto = texto.toLowerCase();
+            return texto.replace(/\b(menos\s)?(\w+)\b/g, (match, menos, palabra) => {
+                const numero = mapaNumeros[palabra] !== undefined ? mapaNumeros[palabra] : isNaN(Number(palabra)) ? match : Number(palabra);
+                return menos ? -numero : numero;
+            });
+        }
+
         
         if (data.event) {
             // This will log the `message` when the entity emits the `event`.
             el.addEventListener(data.event, function () {
-                updateUserMessage('Reconocimiento de voz iniciado...');
+                //updateUserMessage('Reconocimiento de voz iniciado...');
                 console.log(data.message);
+                if (!isRecording) {
+                    if (recognition) {
+                        recognition.start();
+                        isRecording = true;
+                        updateUserMessage('Reconocimiento de voz iniciado...');
+                        el.setAttribute('color', '#4CAF50');
+                    }
+                } else {
+                    if (recognition) {
+                        recognition.stop();
+                        isRecording = false;
+                        updateUserMessage('Reconocimiento de voz detenido.');
+                        el.setAttribute('color','#FF6B6B');
+                    }
+                }w
             });
           } 
           else {
             // `event` not specified, just log the message.
             console.log(data.message);
-            updateUserMessage('Reconocimiento de voz detenido.');
+
           };
+
+          
         // Actualizar el mensaje del usuario en la escena
         function updateUserMessage(message) {
             const messageElement = document.querySelector('#userMessage');
@@ -39,25 +70,6 @@ AFRAME.registerComponent('input-text', {
                 messageElement.setAttribute('value', message);
             }
         }
-
-        // Iniciar/Detener grabación al hacer clic
-        el.addEventListener('click', () => {
-            if (!isRecording) {
-                if (recognition) {
-                    recognition.start();
-                    isRecording = true;
-                    // updateUserMessage('Reconocimiento de voz iniciado...');
-                    el.setAttribute('color', '#4CAF50');
-                }
-            } else {
-                if (recognition) {
-                    recognition.stop();
-                    isRecording = false;
-                    //updateUserMessage('Reconocimiento de voz detenido.');
-                    el.setAttribute('color','#FF6B6B');
-                }
-            }
-        });
 
         // Cuando se recibe un resultado de la transcripción
         if (recognition) {
@@ -67,12 +79,9 @@ AFRAME.registerComponent('input-text', {
                     transcript += event.results[i][0].transcript;
                 }
                 console.log('Transcripción:', transcript);
-
+                transcript = convertirTextoANumero(transcript);
                 // Actualizar el texto en la escena
-                const transcriptionText = document.querySelector('#transcriptionText');
-                if (transcriptionText) {
-                    transcriptionText.setAttribute('value', transcript);
-                }
+                el.emit('transcription', { transcription: transcript });
             };
 
             recognition.onerror = (event) => {

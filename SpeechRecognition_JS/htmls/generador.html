@@ -3,15 +3,17 @@
 <head>
     <meta charset="utf-8">
     <title>A-Frame VR Scene</title>
-    <!-- A-Frame 1.6.0 -->
-    <!--<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>-->
-    <!-- A-Frame Extras compatible con 1.6.0 -->
-    <!--<script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>-->
-    <!-- A-Frame Environment Component compatible con 1.6.0 -->
-    <!--<script src="https://cdn.jsdelivr.net/npm/aframe-environment-component/dist/aframe-environment-component.min.js"></script>-->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!--
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
+
     <script src="../js/generador.js"></script> <!-- Archivo JavaScript externo -->
     <link rel="stylesheet" href="../css/generador.css"> <!-- Archivo CSS externo -->
 </head>
@@ -19,17 +21,8 @@
     <a-scene id="main" xr-mode-ui="enabled: false">
         <!-- Cielo de fondo -->
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
-
-        <a-entity position="0 -10 0" environment="preset: japan; groundColor: #445; grid: cross"></a-entity>
-
         <!-- Elemento de entrada interactivo con input-text -->
-        <a-box id="voiceInputBox"
-            position="0 -0.5 -3"
-            depth="0.15"
-            height="0.25"
-            width="2"
-            color="#8ec3d0"
-            class="clickable"
+        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"
             animation="startEvents: click; property: scale;
             from: 2 2 2; to: 1 1 1; dur: 1000"
             input-text="event: click">
