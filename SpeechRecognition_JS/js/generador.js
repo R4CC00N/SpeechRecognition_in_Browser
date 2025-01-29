@@ -1,7 +1,7 @@
 AFRAME.registerComponent('input-text', {
     schema: {
         message: { type: 'string', default: 'Comienza la grabación!' },
-        event: { type: 'string', default: '' },
+        event: { type: 'string', default: 'click' },
     },
     init: function () {
         const el = this.el;
@@ -34,21 +34,25 @@ AFRAME.registerComponent('input-text', {
         }
 
         // Manejar el evento especificado en el atributo event
+        function toggleRecognition() {
+            console.log(data.message);
+            if (!isRecording) {
+                recognition.start();
+                isRecording = true;
+                updateUserMessage('Reconocimiento de voz iniciado...');
+                el.setAttribute('color', '#4CAF50');
+            } else {
+                recognition.stop();
+                isRecording = false;
+                updateUserMessage('Reconocimiento de voz detenido.');
+                el.setAttribute('color', '#FF6B6B');
+            }
+        }
+
         if (data.event) {
-            el.addEventListener(data.event, function () {
-                console.log(data.message);
-                if (!isRecording) {
-                    recognition.start();
-                    isRecording = true;
-                    updateUserMessage('Reconocimiento de voz iniciado...');
-                    el.setAttribute('color', '#4CAF50');
-                } else {
-                    recognition.stop();
-                    isRecording = false;
-                    updateUserMessage('Reconocimiento de voz detenido.');
-                    el.setAttribute('color', '#FF6B6B');
-                }
-            });
+            el.addEventListener('click', toggleRecognition);
+            el.addEventListener('mouseenter', () => el.setAttribute('color', '#FFD700'));
+            el.addEventListener('mouseleave', () => el.setAttribute('color', '#8ec3d0'));
         }
 
         // Actualizar el mensaje del usuario en la escena
