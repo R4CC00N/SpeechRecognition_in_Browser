@@ -2,10 +2,13 @@
 
 ## Lista de Demos
 
-5. [Intento de generador v2](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador_v2.html)  
+8. [vr ar accion](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/mm.html)  
+   para ver funcionalidad en vr 
+
+7. [Intento de generador v2](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador_v2.html)  
    Intento de creacion de generadore de objetos segun por separado version en proceso aun.
 
-5. [Intento de generador v1](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador.html)  
+6. [Intento de generador v1](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador.html)  
    Intento de creacion de generadore de objetos segun por separado.
 
 5. [Intento de accion en VR](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/ej_vr.html)  
