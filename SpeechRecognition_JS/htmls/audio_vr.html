@@ -3,11 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Micrófono en VR</title>
+    <title>Micrófono en VR con Reconocimiento de Voz</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   </head>
   <body>
     <script>
+      // Verificamos si el navegador soporta SpeechRecognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';  // Configurar el idioma a español
+        recognition.interimResults = true;  // Mostrar resultados parciales
+        recognition.maxAlternatives = 1;  // Limitar a 1 alternativa
+
+        // Empezamos el reconocimiento de voz cuando se detecta un sonido
+        recognition.start();
+
+        // Evento cuando el reconocimiento ha obtenido resultados
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript; // El texto reconocido
+          console.log('Texto reconocido: ', transcript);
+          
+          // Mostrar el texto en el elemento a-text
+          const aText = document.querySelector('#texto-recibido');
+          aText.setAttribute('value', transcript);
+        };
+
+        // Manejo de errores
+        recognition.onerror = function(event) {
+          console.error('Error en el reconocimiento de voz: ', event.error);
+        };
+
+        // Iniciar el reconocimiento de voz
+        recognition.onstart = function() {
+          console.log('Reconocimiento de voz iniciado');
+        };
+
+        recognition.onend = function() {
+          console.log('Reconocimiento de voz terminado');
+          recognition.start();  // Reinicia el reconocimiento de voz si termina
+        };
+      } else {
+        console.log('El navegador no soporta SpeechRecognition');
+      }
+
+      // Solicitar acceso al micrófono
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ audio: true })
           .then(function(stream) {
@@ -18,25 +59,6 @@
 
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
-
-            function update() {
-              analyser.getByteFrequencyData(dataArray);
-
-              // Analizar el volumen del sonido
-              let sum = 0;
-              for (let i = 0; i < bufferLength; i++) {
-                sum += dataArray[i];
-              }
-              const average = sum / bufferLength;
-
-              // Cambiar propiedades en A-Frame (como color o posición de un objeto)
-              const colorValue = Math.min(255, average);
-              document.querySelector('a-box').setAttribute('color', `rgb(${colorValue}, 0, 0)`);
-
-              requestAnimationFrame(update);
-            }
-
-            update();
           })
           .catch(function(error) {
             console.error('Error al acceder al micrófono', error);
@@ -47,8 +69,10 @@
     </script>
 
     <a-scene>
-      <a-box position="0 1.5 -3" color="#4CC3D9"></a-box>
       <a-sky color="#ECECEC"></a-sky>
+      
+      <!-- Aquí el texto mostrado en VR -->
+      <a-text id="texto-recibido" position="0 3 -5" value="Di algo..." color="#000" width="6"></a-text>
     </a-scene>
   </body>
 </html>
