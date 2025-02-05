@@ -16,11 +16,12 @@
       <a-entity movement-controls="fly: false" position="0 0 -1">
         <a-entity camera position="0 1 1.6" look-controls wasd-controls></a-entity>
         <a-entity cursor="rayOrigin:mouse"></a-entity>
+        s<!-- Controladores para VR con raycaster visible y movimiento -->
+        <a-entity laser-controls="hand: left" raycaster="objects: .clickable; showLine: true"></a-entity>
+        <a-entity laser-controls="hand: right" raycaster="objects: .clickable; showLine: true"></a-entity>
+
       </a-entity>
       
-      <!-- Controladores para VR con raycaster visible y movimiento -->
-      <a-entity laser-controls="hand: left" raycaster="objects: .clickable; showLine: true"></a-entity>
-      <a-entity laser-controls="hand: right" raycaster="objects: .clickable; showLine: true"></a-entity>
 
       <!-- Luz ambiental para visibilidad -->
       <a-light type="ambient" intensity="0.8"></a-light>
