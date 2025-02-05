@@ -1,7 +1,8 @@
 # Prototipos de que usan webkitSpeechRecognition
 
 ## Lista de Demos
-
+8. [micro en vr](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/audio_vr.html)  
+   para ver funcionalidad en vr 
 8. [vr ar accion](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/mm.html)  
    para ver funcionalidad en vr 
 

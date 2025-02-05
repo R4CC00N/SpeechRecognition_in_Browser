@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Micrófono en VR</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <script>
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(stream);
+            microphone.connect(analyser);
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function update() {
+              analyser.getByteFrequencyData(dataArray);
+
+              // Analizar el volumen del sonido
+              let sum = 0;
+              for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+              }
+              const average = sum / bufferLength;
+
+              // Cambiar propiedades en A-Frame (como color o posición de un objeto)
+              const colorValue = Math.min(255, average);
+              document.querySelector('a-box').setAttribute('color', `rgb(${colorValue}, 0, 0)`);
+
+              requestAnimationFrame(update);
+            }
+
+            update();
+          })
+          .catch(function(error) {
+            console.error('Error al acceder al micrófono', error);
+          });
+      } else {
+        console.log('El navegador no soporta getUserMedia');
+      }
+    </script>
+
+    <a-scene>
+      <a-box position="0 1.5 -3" color="#4CC3D9"></a-box>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  </body>
+</html>
