@@ -1,11 +1,12 @@
 let isRecording = false;
+let color = false;
 let recognition; // Declaramos fuera para que sea accesible en ambas partes del código.
 
 document.querySelector('#voiceInputBox').addEventListener('click', function () {
   let button = document.querySelector('#voiceInputBox');
 
   // Alternar color
-  let newColor = isRecording ? 'blue' : 'red';
+  let newColor = color ? 'blue' : 'red';
   button.setAttribute('color', newColor);
 
   // Función para convertir texto a números, incluyendo negativos
@@ -31,12 +32,15 @@ document.querySelector('#voiceInputBox').addEventListener('click', function () {
 
   // Iniciar/Detener grabación al hacer clic
   if (!isRecording) {
-    if ('webkitSpeechRecognition' in window) {
-      recognition = new webkitSpeechRecognition();
+    // Verificar si el navegador soporta la API de reconocimiento de voz
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      // Crear una instancia de reconocimiento de voz
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.continuous = true;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Permite ver resultados intermedios
       recognition.lang = 'es-ES';
 
+      // Iniciar el reconocimiento de voz
       recognition.start();
       isRecording = true;
       updateUserMessage('Reconocimiento de voz iniciado...');
@@ -47,20 +51,31 @@ document.querySelector('#voiceInputBox').addEventListener('click', function () {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
-        // Convertir los números en el texto
+        // Convertir los números en el texto si es necesario
         transcript = convertirTextoANumero(transcript);
         // Pasar la transcripción al siguiente componente
         button.emit('transcription', { transcription: transcript });
       };
 
+      // Manejar errores
       recognition.onerror = (event) => {
         console.error('Error en el reconocimiento de voz:', event.error);
         updateUserMessage('Error en reconocimiento de voz.');
       };
+
+      // Detener cuando se termina el reconocimiento
+      recognition.onend = () => {
+        console.log('Reconocimiento de voz terminado');
+        if (isRecording) {
+          recognition.start(); // Reiniciar reconocimiento si es necesario
+        }
+      };
     } else {
       console.error('API de reconocimiento de voz no soportada en este navegador');
+      updateUserMessage('El navegador no soporta el reconocimiento de voz.');
     }
   } else {
+    // Detener el reconocimiento de voz
     if (recognition) {
       recognition.stop();
       recognition = null; // Para que la próxima vez se pueda crear una nueva instancia de reconocimiento
@@ -102,7 +117,7 @@ AFRAME.registerComponent('command-handler', {
             if (transcript.includes('crear')) {
                 currentCommand = 'crear';
                 updateUserMessage('Dime qué objeto crear (cubo, esfera, plano, cilindro)');
-                scene.emit('enter-create-mode');
+                scene.emit('create-mode');
             } else if (currentCommand === 'crear' && components.some((comp) => transcript.includes(comp))) {
                 const objectType = components.find((comp) => transcript.includes(comp));
                 updateUserMessage(`Creando un ${objectType}.`);
@@ -256,7 +271,7 @@ AFRAME.registerComponent('sky-manager', {
         const scene = document.querySelector('a-scene');
         
         // Cambiar el color del fondo al entrar/salir del modo creación
-        scene.addEventListener('enter-create-mode', () => {
+        scene.addEventListener('create-mode', () => {
             // Cambiar el color del fondo a azul claro
             el.setAttribute('material', 'color:rgb(201, 224, 158)');
             console.log('Modo creación activado: color de fondo cambiado.');
