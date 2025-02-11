@@ -189,11 +189,21 @@ AFRAME.registerComponent('object-creator', {
                 
                 // Crear cubo a partir de JSON
                 const entity = document.createElement('a-entity');
+                const text = document.createElement('a-text');
                 entity.setAttribute('id', cubeData.id);
                 entity.setAttribute('geometry', `primitive: ${cubeData.geometry.primitive}; height: ${cubeData.geometry.height}; width: ${cubeData.geometry.width}; depth: ${cubeData.geometry.depth}`);
                 entity.setAttribute('position', `${cubeData.position.x} ${cubeData.position.y} ${cubeData.position.z}`);
                 entity.setAttribute('material', `color: ${cubeData.material.color}`);
                 entity.setAttribute('class', 'dynamic-object'); // ID único para modificarlo después
+                
+
+                text.setAttribute('value', cubeData.id);
+                text.setAttribute('position', '0 1 0'); // Ajustar la posición para que se vea
+                text.setAttribute('align', 'center');
+                text.setAttribute('color', 'white');
+                text.setAttribute('width', '4');
+
+                entity.appendChild(text);
                 scene.appendChild(entity);
                 
                 console.log('Datos del cubo:', JSON.stringify(cubeData, null, 2));
@@ -217,11 +227,20 @@ AFRAME.registerComponent('object-creator', {
                 
                 // Crear esfera a partir de JSON
                 const entity = document.createElement('a-entity');
+                const text = document.createElement('a-text');
                 entity.setAttribute('id', sphereData.id);
                 entity.setAttribute('geometry', `primitive: ${sphereData.geometry.primitive}; radius: ${sphereData.geometry.radius}`);
                 entity.setAttribute('position', `${sphereData.position.x} ${sphereData.position.y} ${sphereData.position.z}`);
                 entity.setAttribute('material', `color: ${sphereData.material.color}`);
                 entity.setAttribute('class', 'dynamic-object');
+                
+                text.setAttribute('value', sphereData.id);
+                text.setAttribute('position', `0 ${sphereData.geometry.radius+(sphereData.geometry.radius/2)} 0`); // Ajustar la posición para que se vea
+                text.setAttribute('align', 'center');
+                text.setAttribute('color', 'white');
+                text.setAttribute('width', '4');
+
+                entity.appendChild(text);
                 scene.appendChild(entity);
                 
                 console.log('Datos de la esfera:', JSON.stringify(sphereData, null, 2));
@@ -244,7 +263,7 @@ let modifyingSphere = false;
 let modifyingPlane = false;
 let modifyingCilinder = false;
 let step = null;
-let step_size = null;
+
 // Componente de comandos dinámicos para modificar atributos
 AFRAME.registerComponent('dynamic-modifier', {
     schema: {
@@ -256,12 +275,35 @@ AFRAME.registerComponent('dynamic-modifier', {
         const inputElement = this.data.input;
         const scene = document.querySelector('a-scene');
         let pos={ x: null, y: null, z: null }
-        let size={primitive:'box', height: null, width: null, depth: null }
+        let size_box={primitive:'box', height: null, width: null, depth: null }
+        let size_sphere={primitive:'sphere', radius:null }
+        let material={color:null }
+        const colorsMap = {
+            'rojo': 'red',
+            'azul': 'blue',
+            'verde': 'green',
+            'amarillo': 'yellow',
+            'negro': 'black',
+            'blanco': 'white',
+            'naranja': 'orange',
+            'morado': 'purple',
+            'rosa': 'pink',
+            'gris': 'gray',
+            'marrón': 'brown'
+        };
+
         function updateUserMessage(message) {
             const messageElement = document.querySelector('#userMessage');
             if (messageElement) {
                 messageElement.setAttribute('value', message);
             }
+        }
+        function getLastCreatedEntity(id) {
+            const entities = document.querySelectorAll('a-entity');
+            if (entities.length > 0) {
+                return entities[entities.length - 1]; // Devuelve el último creado
+            }
+            return null; // Si no hay entidades, retorna null
         }
 
         if (!inputElement) {
@@ -277,8 +319,8 @@ AFRAME.registerComponent('dynamic-modifier', {
                 objectType = 'Cubo'
                 console.log('modo modificacion BOX')
                 console.log('Comando recibido:', transcript);
-                let box_element = document.getElementById("caja");
-
+                let box_element = getLastCreatedEntity();
+                console.log('entidad id: ',getLastCreatedEntity().id)
                 updateUserMessage('Que valores quieres darle de estos (Posicion, Tamaño, Color)');
                 if(step!=null){
                     // Esperando el valor de X
@@ -294,10 +336,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                             updateUserMessage('Por favor, dime un número para X.');
                         }
                         return;
-                    }
-
-                    // Esperando el valor de Y
-                    if (step === 'y') {
+                    }else if (step === 'y') {
                         const yMatch = transcript.match(/-?\d+/);
                         if (yMatch) {
                             pos.y = Number(yMatch[0]);
@@ -309,10 +348,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                             updateUserMessage('Por favor, dime un número para Y.');
                         }
                         return;
-                    }
-
-                    // Esperando el valor de Z
-                    if (step === 'z') {
+                    }else if (step === 'z') {
                         const zMatch = transcript.match(/-?\d+/);
                         if (zMatch) {
                             pos.z = Number(zMatch[0]);
@@ -326,36 +362,52 @@ AFRAME.registerComponent('dynamic-modifier', {
                             updateUserMessage('Por favor, dime un número para Z.');
                         }
                         return;
-                    }
-                }else if(step_size!=null){
-                    if(step_size==='size'){
+                    } else if(step==='size'){
                         const sizeMatch = transcript.match(/-?\d+/);
                         if (sizeMatch) {
-                            size.height = Number(sizeMatch[0]);
-                            size.width = Number(sizeMatch[0]);
-                            size.depth = Number(sizeMatch[0]);
-                            console.log('Tamaño capturado',size);
+                            size_box.height = Number(sizeMatch[0]);
+                            size_box.width = Number(sizeMatch[0]);
+                            size_box.depth = Number(sizeMatch[0]);
+                            console.log('Tamaño capturado',size_box);
                             // Aplicar los cambios al cubo en la escena
-                            box_element.setAttribute('geometry', size);
+                            box_element.setAttribute('geometry', size_box);
                             // Reiniciar el flujo
-                            step_size = null;
+                            step = null;
                         } else {
                             updateUserMessage('Por favor, dime un tamaño para el objeto');
                         }
                         return;
-                    }
-                } else{
+                }else if(step==='color'){
+                        const colorMatch = transcript.toLowerCase();
+                        console.log('awaaaaaaaa',colorMatch);
+                        const matchedColor = Object.keys(colorsMap).find(color => colorMatch.includes(color));
+    
+                        if (matchedColor) {
+                            material.color = colorsMap[matchedColor];
+                            console.log('weeeeeeeeee', material);
+                            box_element.setAttribute('material', material);
+                            // Reiniciar el flujo
+                            step = null;
+                        } else {
+                            updateUserMessage('Por favor, dime un color válido para el objeto');
+                        }
+                        return;
+                    
+                }
+            }else{
                     // Si el usuario dice "posición", iniciamos el flujo de captura de coordenadas
                     if (step === null && transcript.includes('posición')) {
                         step = 'x';
                         updateUserMessage('¿Qué valor en X?');
                         return;
                     }else if (transcript.includes('tamaño')) {
-                        step_size = 'size'
+                        step = 'size'
                         updateUserMessage('que tamaño?');
                         return;
                     } else if (transcript.includes('color')) {
-                        console.log('funciona color')
+                        step = 'color'
+                        updateUserMessage('que color?');
+                        return;
                     }else if (transcript.includes('cambio')) {
                         console.log('funciona salir')
                         modifyingBox=false
@@ -370,18 +422,102 @@ AFRAME.registerComponent('dynamic-modifier', {
                 objectType = 'Esfera'
                 console.log('modo modificacion SPHERE')
                 console.log('Comando recibido:', transcript);
-                if (transcript.includes('posición')) {
-                    console.log('funciona posicion')
-                } else if (transcript.includes('tamaño')) {
-                    console.log('funciona tamaño')
-                } else if (transcript.includes('color')) {
-                    console.log('funciona color')
-                }else if (transcript.includes('cambio')) {
-                    console.log('funciona salir')
-                    modifyingSphere=false
-                    updateUserMessage(`se ha terminado de crear el ${objectType}`);
-                    scene.emit('exit-create-mode')
+                let sphere_element = getLastCreatedEntity();
+
+                updateUserMessage('Que valores quieres darle de estos (Posicion, Tamaño, Color)');
+                if(step!=null){
+                    // Esperando el valor de X
+                    if (step === 'x') {
+                        const xMatch = transcript.match(/-?\d+/);
+                        if (xMatch) {
+                            pos.x = Number(xMatch[0]);
+                            console.log('Posición X capturada:', pos.x);
+                            sphere_element.setAttribute('position', pos);
+                            step = 'y';  // Pasamos al siguiente paso
+                            updateUserMessage('¿Qué valor en Y?');
+                        } else {
+                            updateUserMessage('Por favor, dime un número para X.');
+                        }
+                        return;
+                    }else if (step === 'y') {
+                        const yMatch = transcript.match(/-?\d+/);
+                        if (yMatch) {
+                            pos.y = Number(yMatch[0]);
+                            console.log('Posición Y capturada:', pos.y);
+                            sphere_element.setAttribute('position', pos);
+                            step = 'z';  // Pasamos al siguiente paso
+                            updateUserMessage('¿Qué valor en Z?');
+                        } else {
+                            updateUserMessage('Por favor, dime un número para Y.');
+                        }
+                        return;
+                    }else if (step === 'z') {
+                        const zMatch = transcript.match(/-?\d+/);
+                        if (zMatch) {
+                            pos.z = Number(zMatch[0]);
+                            console.log('Posición Z capturada:', pos.z);
+                            // Aplicar los cambios al cubo en la escena
+                            sphere_element.setAttribute('position', pos);
+                            console.log('position: ',pos)
+                            // Reiniciar el flujo
+                            step = null;
+                        } else {
+                            updateUserMessage('Por favor, dime un número para Z.');
+                        }
+                        return;
+                    } else if(step==='size'){
+                        const sizeMatch = transcript.match(/-?\d+/);
+                        if (sizeMatch) {
+                            size_sphere.radius = Number(sizeMatch[0]);
+                            console.log('Tamaño capturado',size_sphere);
+                            // Aplicar los cambios al cubo en la escena
+                            sphere_element.setAttribute('geometry', size_sphere);
+                            //console.log('child->>',sphere_element.querySelector('a-text').setAttribute('position', `0 ${sphere_element.position.y + 1} 0`))
+                            // Reiniciar el flujo
+                            step = null;
+                        } else {
+                            updateUserMessage('Por favor, dime un tamaño para el objeto');
+                        }
+                        return;
+                }else if(step==='color'){
+                        const colorMatch = transcript.toLowerCase();
+                        console.log('awaaaaaaaa',colorMatch);
+                        const matchedColor = Object.keys(colorsMap).find(color => colorMatch.includes(color));
+    
+                        if (matchedColor) {
+                            material.color = colorsMap[matchedColor];
+                            console.log('weeeeeeeeee', material);
+                            sphere_element.setAttribute('material', material);
+                            // Reiniciar el flujo
+                            step = null;
+                        } else {
+                            updateUserMessage('Por favor, dime un color válido para el objeto');
+                        }
+                        return;
+                    
                 }
+            }else{
+                    // Si el usuario dice "posición", iniciamos el flujo de captura de coordenadas
+                    if (step === null && transcript.includes('posición')) {
+                        step = 'x';
+                        updateUserMessage('¿Qué valor en X?');
+                        return;
+                    }else if (transcript.includes('tamaño')) {
+                        step = 'size'
+                        updateUserMessage('que tamaño?');
+                        return;
+                    } else if (transcript.includes('color')) {
+                        step = 'color'
+                        updateUserMessage('que color?');
+                        return;
+                    }else if (transcript.includes('cambio')) {
+                        console.log('funciona salir')
+                        modifyingSphere=false
+                        updateUserMessage(`se ha terminado de crear el ${objectType}`);
+                        scene.emit('exit-create-mode')
+                    }
+    
+                }            
             }
         });
     },
