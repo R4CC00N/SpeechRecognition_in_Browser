@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>A-Frame VR Scene</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="../js/generador_objetos_funcional.js"></script> <!-- Archivo JavaScript externo -->
+    <script src="../js/generador_objetos_funcional_v2.js"></script> <!-- Archivo JavaScript externo -->
     <link rel="stylesheet" href="../css/generador.css"> <!-- Archivo CSS externo -->
 </head>
 <body>
@@ -40,7 +40,25 @@
         <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>
         <a-entity id="object" object-creator="input: #create"></a-entity>
         <!-- Componente dynamic-modifier para manejar modificaciones dinámicas -->
+        <a-entity id="functions" common-functions></a-entity>
         <a-entity id="dynamic-modifier" dynamic-modifier="input: #voiceInputBox"></a-entity>
+        <a-entity id="edit" edit-mode-handler="input: #voiceInputBox"></a-entity>
+        
+
+        <!-- Cubo -->
+        <a-box id="pepe" position="-2 -1 -15" color="#4CC3D9" scale="1 1 1">
+            <a-text value="pepe" align="center" position="0 1 0.3" color="black" width="10"></a-text>
+        </a-box>
+
+        <!-- Esfera -->
+        <a-sphere id="paco" position="2 -1 -15" radius="1.25" color="#EF2D5E">
+            <a-text value="paco" align="center" position="0 2 0.3" color="black" width="10"></a-text>
+        </a-sphere>
+
+        <!-- Plano -->
+        <a-plane position="0 -2 -15" rotation="-90 0 0" width="20" height="20" color="#7BC8A4"></a-plane>
+    
+
     </a-scene>
 </body>
 </html>
