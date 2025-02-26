@@ -1,6 +1,7 @@
 # Prototipos de que usan webkitSpeechRecognition
 
 ## Lista de Demos
+11. [Generador de Objetos con Edicion](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador_objetos_editables.html)  
 
 10. [Generador de Objetos](https://r4cc00n.github.io/SpeechRecognition_in_Browser/SpeechRecognition_JS/htmls/generador_objetos.html)  
 
