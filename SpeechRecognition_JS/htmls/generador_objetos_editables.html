@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <title>A-Frame VR Scene</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="../js/generador_objetos_funcional_v2.js"></script> <!-- Archivo JavaScript externo -->
+    
     <link rel="stylesheet" href="../css/generador.css"> <!-- Archivo CSS externo -->
 </head>
 <body>
@@ -12,25 +14,27 @@
         <!-- Cielo de fondo -->
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
 
-        <!-- Elemento de entrada interactivo con input-text -->
-        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"             
-        animation="startEvents: click; property: scale;
-        from: 2 2 2; to: 1 1 1; dur: 1000"
-        input-text="event: click">
-            <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
-        </a-box>
-
         <!-- Plano de texto para mostrar la transcripción en 3D -->
-        <a-plane position="0 0.5 -3" width="6" height="2" color="white" transcription-display="input: #voiceInputBox">
-            <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+        <a-plane position="0 5 -45" width="16" height="6" color="white" transcription-display="input: #voiceInputBox" look-at="[camera]">
+            <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1" width="25" 
+            font=""></a-text>
         </a-plane>
 
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
-        <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
+        <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 10 -45" width="25" look-at="[camera]"></a-text>
 
         <!-- Cursor y controladores VR -->
-        <a-entity movement-controls="fly: false" position="0 0 -1">
-            <a-entity  camera position="0 2 4" look-controls wasd-controls></a-entity>
+        <a-entity id='player' movement-controls="fly: false" position="0 0 -1">
+            <a-entity  camera position="0 2 4" look-controls wasd-controls>
+                <!-- Elemento de entrada interactivo con input-text -->
+                <!--LOOK AT-->
+                <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"             
+                animation="startEvents: click; property: scale;
+                from: 2 2 2; to: 1 1 1; dur: 1000"
+                input-text="event: click">
+                    <a-text value="Pulsa para grabar/detener" align="center" position="0 0 0.1" color="black" width="3"></a-text>
+                </a-box>
+            </a-entity>
             <a-entity cursor="rayOrigin: mouse"></a-entity>
             <!-- Controlador de mano derecha -->
             <a-entity  laser-controls="hand: right" cursor="fuse: true; rayOrigin: controller"></a-entity>
@@ -45,18 +49,25 @@
         <a-entity id="edit" edit-mode-handler="input: #voiceInputBox"></a-entity>
         
 
+        <!-- LUCES -->
+        <a-light type="ambient" color="white" intensity="0.3"></a-light>
+        <a-light type="point" position="0 3 0" intensity="0.3" color="#6f6f6f"></a-light>
+
         <!-- Cubo -->
-        <a-box id="pepe" position="-2 -1 -15" color="#4CC3D9" scale="1 1 1">
+        <a-box id="pepe" position="-2 0 -15" color="#4CC3D9"  scale="1 1 1">
             <a-text value="pepe" align="center" position="0 1 0.3" color="black" width="10"></a-text>
         </a-box>
 
+
         <!-- Esfera -->
-        <a-sphere id="paco" position="2 -1 -15" radius="1.25" color="#EF2D5E">
+        <a-sphere id="paco" position="2 0 -15" radius="1.25" color="#EF2D5E">
             <a-text value="paco" align="center" position="0 2 0.3" color="black" width="10"></a-text>
         </a-sphere>
-
+        
+        
+        
         <!-- Plano -->
-        <a-plane position="0 -2 -15" rotation="-90 0 0" width="20" height="20" color="#7BC8A4"></a-plane>
+        <a-plane position="0 -1 -15" rotation="-90 0 0" width="20" height="20" color="#7BC8A4"></a-plane>
     
 
     </a-scene>

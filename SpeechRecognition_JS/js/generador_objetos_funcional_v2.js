@@ -80,7 +80,7 @@ AFRAME.registerComponent('input-text', {
         }
 });
 
-    AFRAME.registerComponent('command-handler', {
+AFRAME.registerComponent('command-handler', {
         schema: {
             input: { type: 'selector', default: null },
         },
@@ -89,7 +89,8 @@ AFRAME.registerComponent('input-text', {
             const el = this.el;
             const inputElement = this.data.input;
             const scene = document.querySelector('a-scene');
-            const components = ['cubo', 'esfera', 'plano', 'cilindro'];
+            const components = ['cubo', 'esfera', 'plano', 'cilindro','luz'];
+            const assets = ['pistola1','pistola2']
             let currentCommand = null;
     
             if (!inputElement) {
@@ -107,7 +108,7 @@ AFRAME.registerComponent('input-text', {
                 }
                 if (transcript.includes('crear')) {
                     currentCommand = 'crear';
-                    updateUserMessage('Dime qué objeto crear (cubo, esfera, plano, cilindro)');
+                    updateUserMessage('Dime qué objeto crear (cubo, esfera, plano, cilindro, luz, assets)');
                     scene.emit('enter-create-mode');
                 } else if (currentCommand === 'crear' && components.some((comp) => transcript.includes(comp))) {
                     const objectType = components.find((comp) => transcript.includes(comp));
@@ -115,7 +116,12 @@ AFRAME.registerComponent('input-text', {
                     currentCommand = null; // Resetear el comando
                     // Emitir un evento para iniciar la creación en object-creator
                     scene.emit('start-object-creation', { type: objectType });
-                } else if (transcript.includes('salir')) {
+                } 
+                else if (currentCommand === 'crear' && transcript.includes('assets')) {
+                    currentCommand = assets
+                    updateUserMessage(`¿Que asset quieres? ${assets}.`);                    
+                }
+                else if (transcript.includes('salir')) {
                     currentCommand = 'fin';
                     updateUserMessage('Terminando creación');
                     scene.emit('exit-create-mode');
@@ -126,10 +132,10 @@ AFRAME.registerComponent('input-text', {
                 }
             });
         }
-    });
+});
     
-    // Componente de visualización de transcripción
-    AFRAME.registerComponent('transcription-display', {
+// Componente de visualización de transcripción
+AFRAME.registerComponent('transcription-display', {
         schema: {
             input: { type: 'selector', default: null }, // Selector del elemento que genera transcripciones
         },
@@ -155,7 +161,7 @@ AFRAME.registerComponent('input-text', {
                 }
             });
         }
-    });
+});
 
 
 // Componente para crear objetos
@@ -181,7 +187,11 @@ AFRAME.registerComponent('object-creator', {
                     position: { x: 0, y: 5, z: -13 },
                     material: { color: 'rgb(255, 166, 0)' }
                 };
+
                 
+                let objectHeight = cubeData.geometry.height || (cubeData.geometry.radius * 2) || 1; // fallback por si no hay info
+                // Calcular posición del texto basado en altura del objeto
+                const textY = objectHeight / 2 + 1; // 1 unidad por encima del tope
                 // Crear cubo a partir de JSON
                 const entity = document.createElement('a-entity');
                 const text = document.createElement('a-text');
@@ -193,10 +203,10 @@ AFRAME.registerComponent('object-creator', {
                 
 
                 text.setAttribute('value', cubeData.id);
-                text.setAttribute('position', '0 1 0'); // Ajustar la posición para que se vea
+                text.setAttribute('position', `0 ${textY} 0`); // Ajustar la posición para que se vea
                 text.setAttribute('align', 'center');
                 text.setAttribute('color', 'black');
-                text.setAttribute('width', '4');
+                text.setAttribute('width', '10');
 
                 entity.appendChild(text);
                 scene.appendChild(entity);
@@ -219,6 +229,12 @@ AFRAME.registerComponent('object-creator', {
                     position: { x: 5, y: 5, z: -5 },
                     material: { color: 'rgb(255, 93, 193)' }
                 };
+
+
+                let objectHeight = sphereData.geometry.height || (sphereData.geometry.radius * 2) || 1; // fallback por si no hay info
+                // Calcular posición del texto basado en altura del objeto
+                const textY = objectHeight / 2 + 1; // 1 unidad por encima del tope
+
                 // Crear esfera a partir de JSON
                 const entity = document.createElement('a-entity');
                 const text = document.createElement('a-text');
@@ -229,10 +245,10 @@ AFRAME.registerComponent('object-creator', {
                 entity.setAttribute('class', 'dynamic-object');
                 
                 text.setAttribute('value', sphereData.id);
-                text.setAttribute('position', `0 ${sphereData.geometry.radius+(sphereData.geometry.radius/2)} 0`); // Ajustar la posición para que se vea
+                text.setAttribute('position', `0 ${textY} 0`); // Ajustar la posición para que se vea
                 text.setAttribute('align', 'center');
                 text.setAttribute('color', 'black');
-                text.setAttribute('width', '4');
+                text.setAttribute('width', '10');
 
                 entity.appendChild(text);
                 scene.appendChild(entity);
@@ -258,6 +274,10 @@ AFRAME.registerComponent('object-creator', {
                     material: { color: 'rgb(121, 207, 64)' }
                 };
 
+                // Asumimos que lightData.geometry tiene una propiedad "height" o "radius"
+                let objectHeight = planeData.geometry.height || (planeData.geometry.radius * 2) || 1; // fallback por si no hay info
+                // Calcular posición del texto basado en altura del objeto
+                const textY = objectHeight / 2 + 1; // 1 unidad por encima del tope
                 // Crear cubo a partir de JSON
                 const entity = document.createElement('a-entity');
                 const text = document.createElement('a-text');
@@ -270,10 +290,10 @@ AFRAME.registerComponent('object-creator', {
                 
 
                 text.setAttribute('value', planeData.id);
-                text.setAttribute('position', '0 1 0'); // Ajustar la posición para que se vea
+                text.setAttribute('position', `0 ${textY} 0`); // Ajustar la posición para que se vea
                 text.setAttribute('align', 'center');
                 text.setAttribute('color', 'black');
-                text.setAttribute('width', '4');
+                text.setAttribute('width', '10');
 
                 entity.appendChild(text);
                 scene.appendChild(entity);
@@ -283,9 +303,76 @@ AFRAME.registerComponent('object-creator', {
                 // Guardar JSON en localStorage (opcional)
                 localStorage.setItem('planeData', JSON.stringify(planeData));
                 // detecta una palabra 
-                modifyingBox = true;
+                modifyingPlane = true;
                 currentObject = entity;
-            }else {
+            }else if (objectType === 'luz'){
+                const lightData = {
+                    id: 'luz',
+                    light: {
+                        type: 'point',
+                        color: '#EF2D5E',
+                        intensity: 0.5,
+                        distance: 0,
+                        decay: 1
+                    },
+                    position: { x: 2, y: 0, z: -3 },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    geometry: {
+                        primitive: 'sphere',
+                        radius: 0.05
+                    },
+                    material: {
+                        color: '#EF2D5E',
+                        shader: 'flat'
+                    }
+                };
+                
+                // Fallback para altura del objeto
+                let objectHeight = lightData.geometry.height || (lightData.geometry.radius * 2) || 1;
+                
+                // Crear entidad para representar visualmente la luz (como una esfera)
+                const entity = document.createElement('a-entity');
+                entity.setAttribute('id', lightData.id);
+                entity.setAttribute('geometry', `primitive: ${lightData.geometry.primitive}; radius: ${lightData.geometry.radius}`);
+                entity.setAttribute('material',  `color: red; wireframe: true`);
+                entity.setAttribute('position', `${lightData.position.x} ${lightData.position.y} ${lightData.position.z}`);
+                entity.setAttribute('rotation', `${lightData.rotation.x} ${lightData.rotation.y} ${lightData.rotation.z}`);
+                entity.setAttribute('class', 'dynamic-object');
+                
+                // Crear el texto
+                const text = document.createElement('a-text');
+                const textY = objectHeight / 2 + 1; // 1 unidad arriba
+                text.setAttribute('value', lightData.id);
+                text.setAttribute('position', `0 ${textY} 0`);
+                text.setAttribute('align', 'center');
+                text.setAttribute('color', 'black');
+                text.setAttribute('width', '10');
+                entity.appendChild(text);
+                
+                // Crear la luz real
+                const lightEntity = document.createElement('a-light');
+                lightEntity.setAttribute('type', lightData.light.type);
+                lightEntity.setAttribute('color', lightData.material.color);
+                lightEntity.setAttribute('intensity', lightData.geometry.radius);
+                lightEntity.setAttribute('distance', lightData.light.distance);
+                lightEntity.setAttribute('decay', lightData.light.decay);
+                lightEntity.setAttribute('position', `${lightData.position.x} ${lightData.position.y} ${lightData.position.z}`);
+                
+                // Agregar ambos al DOM
+                entity.appendChild(lightEntity);
+                scene.appendChild(entity);
+                
+                
+                
+                console.log('Datos del cubo:', JSON.stringify(lightData, null, 2));
+                
+                // Guardar JSON en localStorage (opcional)
+                localStorage.setItem('lightData', JSON.stringify(lightData));
+                // detecta una palabra 
+                modifyingLight = true;
+                currentObject = entity;
+            }
+            else {
                 console.log(`Tipo de objeto no soportado: ${objectType}`);
             }
         });
@@ -296,6 +383,7 @@ let modifyingBox = false;
 let modifyingSphere = false;
 let modifyingPlane = false;
 let modifyingCylinder = false;
+let modifyingLight = false;
 let step = null;
 const colorsMap = {
     'rojo': 'red',
@@ -310,6 +398,37 @@ const colorsMap = {
     'gris': 'gray',
     'marrón': 'brown',
 };
+const colorAliases = {
+    'rojito': 'rojo',
+    'roji': 'rojo',
+    'azulito': 'azul',
+    'verdecito': 'verde',
+    'amarillito': 'amarillo',
+    'negrito': 'negro',
+    'blanquito': 'blanco',
+    'naranjita': 'naranja',
+    'lila': 'morado',
+    'violeta': 'morado',
+    'rosita': 'rosa',
+    'grisecito': 'gris',
+    'cafecito': 'marrón',
+    'café': 'marrón',
+    'celeste': 'azul', // o un color aparte si querés
+
+    // Inglés directo
+    'red': 'rojo',
+    'blue': 'azul',
+    'green': 'verde',
+    'yellow': 'amarillo',
+    'black': 'negro',
+    'white': 'blanco',
+    'orange': 'naranja',
+    'purple': 'morado',
+    'pink': 'rosa',
+    'gray': 'gris',
+    'brown': 'marrón',
+  };
+  
 
 
 // Componente de comandos dinámicos para modificar atributos
@@ -321,7 +440,7 @@ AFRAME.registerComponent('dynamic-modifier', {
     init: function () {
       const inputElement = this.data.input;
       const scene = document.querySelector('a-scene');
-  
+
       // Obtener la última entidad creada
       function getLastCreatedEntity() {
         const entities = document.querySelectorAll('a-entity');
@@ -331,34 +450,6 @@ AFRAME.registerComponent('dynamic-modifier', {
         return null; // Si no hay entidades, retorna null
       }
         // Captura de posición
-
-        // Captura de posición y rotacion
-        // function updateEntityAttribute(type, posKey, entity, transcript) {
-        //     const match = transcript.match(/-?\d+(\.\d+)?/);
-        //     if (match) {
-        //         const newValue = parseFloat(match[0]);
-        //         let attribute = entity.getAttribute(type);
-        // 
-        //         if (!attribute) {
-        //             attribute = { x: 0, y: 0, z: 0 };
-        //         }
-        // 
-        //         if (posKey === 'x' || posKey === 'y' || posKey === 'z') {
-        //             attribute[posKey] = newValue;
-        //         } else {
-        //             updateUserMessage(`Error: posKey debe ser 'x', 'y' o 'z', no ${posKey}.`);
-        //             return;
-        //         }
-        // 
-        //         entity.setAttribute(type, attribute);
-        // 
-        //         const nextStep = posKey === 'x' ? 'y' : posKey === 'y' ? 'z' : null;
-        //         updateUserMessage(nextStep ? `¿Qué valor en ${nextStep}?` : `${type} completa. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)`);
-        //     } else {
-        //         updateUserMessage(`Por favor, dime un número para ${type.toUpperCase()} ${posKey}.`);
-        //     }
-        // }
-
         function stepsPOS(posKey, entity, transcript) {
             const match = transcript.match(/-?\d+(\.\d+)?/);
             if (match) {
@@ -395,27 +486,42 @@ AFRAME.registerComponent('dynamic-modifier', {
         } else {
             updateUserMessage(`Por favor, dime un número para ROT ${posKey}.`);
         }
-    }
-    
- 
-  
-  // Captura de color
-          // Función para capturar el color
+        }
+
+        // Captura de color
         function stepCOLOR(entity, transcript) {
-            const colorMatch = transcript.toLowerCase();
-            const matchedColor = Object.keys(colorsMap).find(color => colorMatch.includes(color));
+          const lowerTranscript = transcript.toLowerCase().trim();
+    
+          // Reemplazar alias en el transcript por el color base
+          let replacedTranscript = lowerTranscript;
+          Object.keys(colorAliases).forEach(alias => {
+              if (replacedTranscript.includes(alias)) {
+                  replacedTranscript = replacedTranscript.replace(alias, colorAliases[alias]);
+              }
+          });
+    
+          const matchedColor = Object.keys(colorsMap).find(color => replacedTranscript.includes(color));
+          const entityChild = entity.querySelector('a-light');
             if (matchedColor) {
+                // Cambiar color del material de la entidad principal
                 entity.setAttribute('material', 'color', colorsMap[matchedColor]);
+            
+                // Si tiene luz, cambiar también el color de la luz
+                if (entityChild) {
+                    entityChild.setAttribute('light', 'color', colorsMap[matchedColor]);
+                }
+            
                 step = null;
                 updateUserMessage('Color modificado. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)');
             } else {
                 updateUserMessage('Por favor, dime un color válido para el objeto.');
             }
         }
+
         
         // Captura de ID
         function stepID(entity, transcript) {
-            const idMatch = transcript.toLowerCase().replace(/\.$/, '');
+            const idMatch = transcript.trim().toLowerCase().replace(/\.$/, '');
             entity.id = idMatch;
             entity.setAttribute('id', entity.id);
         
@@ -434,9 +540,8 @@ AFRAME.registerComponent('dynamic-modifier', {
             'segmentsDepth', 'thetaLength', 'thetaStart'
             ];
             const sizeMatch = transcript.match(/-?\d+(\.\d+)?/);
-        
-            if (sizeMatch) {
             const newSize = parseFloat(sizeMatch[0]);
+            if (sizeMatch) {
             Object.keys(entity.components.geometry.oldData).forEach(key => {
                 if (!excludeKeys.includes(key)) {
                 entity.components.geometry.oldData[key] = newSize;
@@ -448,7 +553,55 @@ AFRAME.registerComponent('dynamic-modifier', {
             } else {
             updateUserMessage('Por favor, dime un tamaño para el objeto.');
             }
-        }
+            const entityChild = entity.querySelector('a-text');
+            const entityChildlight = entity.querySelector('a-light');
+            if (entityChild) {
+                console.log('child: ', entityChild);
+            
+                // Verificar si el objeto es una esfera o un cilindro/torus y calcular la "altura" adecuada
+                let objectHeight;
+            
+                if (entity.components.geometry && entity.components.geometry.oldData) {
+                    // Si es esfera, usamos el radio como altura
+                    if (entity.components.geometry.oldData.radius) {
+                        objectHeight = entity.components.geometry.oldData.radius;
+                        // Calcular la posición Y para el texto (1 unidad por encima del tope)
+                        const textY = objectHeight + 0.5;// Colocamos el texto justo encima, 0.5 unidades más arriba
+                        console.log('child posY: ', textY);
+                        console.log('objectHeight: ', objectHeight);
+            
+                        // Establecer la nueva posición del texto
+                        entityChild.setAttribute('position', `0 ${textY} 0`);
+                    }
+                    // Si es un cilindro o torus, usamos la altura
+                    else if (entity.components.geometry.oldData.height) {
+                        objectHeight = entity.components.geometry.oldData.height;
+                                        // Calcular la posición Y para el texto (1 unidad por encima del tope)
+                        const textY = objectHeight/2 + 1;// Colocamos el texto justo encima, 0.5 unidades más arriba
+                        console.log('child posY: ', textY);
+                        console.log('objectHeight: ', objectHeight);
+            
+                        // Establecer la nueva posición del texto
+                         entityChild.setAttribute('position', `0 ${textY} 0`);
+                    } else {
+                        objectHeight = 1; // Fallback si no tiene ni altura ni radio
+                    }
+                } else {
+                    objectHeight = 1; // Fallback si no hay datos de geometría
+                }
+            
+                
+            }
+            if(entityChildlight){
+                console.log('intensidad: ', entityChildlight);
+                entityChildlight.setAttribute('intensity', newSize);
+                entity.setAttribute('geometry', 'radius','0.05');
+                entityChild.setAttribute('position', '0 1 0');
+
+                step = null;
+            }
+            
+        } 
     
       if (!inputElement) {
         console.error('No se ha especificado un elemento de entrada para dynamic-modifier');
@@ -469,6 +622,7 @@ AFRAME.registerComponent('dynamic-modifier', {
           updateUserMessage('¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)');
   
           if (step) {
+            console.log('entidad: ',entity)
             const stepActions = {
               'x': () => stepsPOS('x', entity, transcript),
               'y': () => stepsPOS('y', entity, transcript),
@@ -486,7 +640,7 @@ AFRAME.registerComponent('dynamic-modifier', {
             }
             return;
           }
-  
+
           // Detección de palabras clave
           const keywordActions = {
             'posición': { step: 'x', message: '¿Qué valor para POS en X?' },
@@ -505,6 +659,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                         modifyingSphere = false;
                         modifyingCylinder = false;
                         modifyingPlane = false;
+                        modifyingLight = false;
                         updateUserMessage(`Se ha terminado de modificar el ${objectType}`);
                         scene.emit('exit-create-mode');
                                         // Mostrar otro mensaje después de 3 segundos
@@ -526,6 +681,7 @@ AFRAME.registerComponent('dynamic-modifier', {
           { modifyingFlag: modifyingSphere, objectType: 'Esfera' },
           { modifyingFlag: modifyingCylinder, objectType: 'Cilindro' },
           { modifyingFlag: modifyingPlane, objectType: 'Plano' },
+          { modifyingFlag: modifyingLight, objectType: 'Luz' },
         ];
   
         // Ejecuta la modificación para cada objeto
@@ -539,7 +695,7 @@ AFRAME.registerComponent('dynamic-modifier', {
     },
   });
 
-  AFRAME.registerComponent('edit-mode-handler', {
+AFRAME.registerComponent('edit-mode-handler', {
     schema: {
         input: { type: 'selector', default: null },
     },
@@ -547,7 +703,6 @@ AFRAME.registerComponent('dynamic-modifier', {
     init: function () {
         const inputElement = this.data.input;
         const scene = document.querySelector('a-scene');
-
         let entityToEdit = null; // Objeto a editar
         let step = null; // Paso actual en la edición
 
@@ -566,13 +721,13 @@ AFRAME.registerComponent('dynamic-modifier', {
         
             // Avanza al siguiente eje
             step = posKey === 'x' ? 'y' : posKey === 'y' ? 'z' : null;
-            updateUserMessage(step ? `¿Qué valor en ${step}?` : 'Posición completa. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)');
+            updateUserMessage(step ? `¿Qué valor en POS ${step}?` : 'Posición completa. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)');
             } else {
-            updateUserMessage(`Por favor, dime un número para ${posKey}.`);
+            updateUserMessage(`Por favor, dime un número para POS ${posKey}.`);
             }
         }
-        
-        // Captura de rotacion
+
+       // Captura de rotacion
 
        function stepsROT(posKey, entity, transcript) {
         const match = transcript.match(/-?\d+(\.\d+)?/);
@@ -592,23 +747,42 @@ AFRAME.registerComponent('dynamic-modifier', {
         } else {
             updateUserMessage(`Por favor, dime un número para ROT ${posKey}.`);
         }
-    }
+        }
+
         // Captura de color
         function stepCOLOR(entity, transcript) {
-            const colorMatch = transcript.toLowerCase();
-            const matchedColor = Object.keys(colorsMap).find(color => colorMatch.includes(color));
+          const lowerTranscript = transcript.toLowerCase().trim();
+    
+          // Reemplazar alias en el transcript por el color base
+          let replacedTranscript = lowerTranscript;
+          Object.keys(colorAliases).forEach(alias => {
+              if (replacedTranscript.includes(alias)) {
+                  replacedTranscript = replacedTranscript.replace(alias, colorAliases[alias]);
+              }
+          });
+    
+          const matchedColor = Object.keys(colorsMap).find(color => replacedTranscript.includes(color));
+          const entityChild = entity.querySelector('a-light');
             if (matchedColor) {
+                // Cambiar color del material de la entidad principal
                 entity.setAttribute('material', 'color', colorsMap[matchedColor]);
+            
+                // Si tiene luz, cambiar también el color de la luz
+                if (entityChild) {
+                    entityChild.setAttribute('light', 'color', colorsMap[matchedColor]);
+                }
+            
                 step = null;
                 updateUserMessage('Color modificado. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)');
             } else {
                 updateUserMessage('Por favor, dime un color válido para el objeto.');
             }
         }
+
         
         // Captura de ID
         function stepID(entity, transcript) {
-            const idMatch = transcript.toLowerCase().replace(/\.$/, '');
+            const idMatch = transcript.trim().toLowerCase().replace(/\.$/, '');
             entity.id = idMatch;
             entity.setAttribute('id', entity.id);
         
@@ -627,9 +801,8 @@ AFRAME.registerComponent('dynamic-modifier', {
             'segmentsDepth', 'thetaLength', 'thetaStart'
             ];
             const sizeMatch = transcript.match(/-?\d+(\.\d+)?/);
-        
-            if (sizeMatch) {
             const newSize = parseFloat(sizeMatch[0]);
+            if (sizeMatch) {
             Object.keys(entity.components.geometry.oldData).forEach(key => {
                 if (!excludeKeys.includes(key)) {
                 entity.components.geometry.oldData[key] = newSize;
@@ -641,16 +814,90 @@ AFRAME.registerComponent('dynamic-modifier', {
             } else {
             updateUserMessage('Por favor, dime un tamaño para el objeto.');
             }
-        }
+            const entityChild = entity.querySelector('a-text');
+            const entityChildlight = entity.querySelector('a-light');
+            if (entityChild) {
+                console.log('child: ', entityChild);
             
-        if (!inputElement) {
-            console.error('No se ha especificado un elemento de entrada para edit-mode-handler');
-            return;
+                // Verificar si el objeto es una esfera o un cilindro/torus y calcular la "altura" adecuada
+                let objectHeight;
+            
+                if (entity.components.geometry && entity.components.geometry.oldData) {
+                    // Si es esfera, usamos el radio como altura
+                    if (entity.components.geometry.oldData.radius) {
+                        objectHeight = entity.components.geometry.oldData.radius;
+                        // Calcular la posición Y para el texto (1 unidad por encima del tope)
+                        const textY = objectHeight + 0.5;// Colocamos el texto justo encima, 0.5 unidades más arriba
+                        console.log('child posY: ', textY);
+                        console.log('objectHeight: ', objectHeight);
+            
+                        // Establecer la nueva posición del texto
+                        entityChild.setAttribute('position', `0 ${textY} 0`);
+                    }
+                    // Si es un cilindro o torus, usamos la altura
+                    else if (entity.components.geometry.oldData.height) {
+                        objectHeight = entity.components.geometry.oldData.height;
+                                        // Calcular la posición Y para el texto (1 unidad por encima del tope)
+                        const textY = objectHeight/2 + 1;// Colocamos el texto justo encima, 0.5 unidades más arriba
+                        console.log('child posY: ', textY);
+                        console.log('objectHeight: ', objectHeight);
+            
+                        // Establecer la nueva posición del texto
+                         entityChild.setAttribute('position', `0 ${textY} 0`);
+                    } else {
+                        objectHeight = 1; // Fallback si no tiene ni altura ni radio
+                    }
+                } else {
+                    objectHeight = 1; // Fallback si no hay datos de geometría
+                }
+            
+                
+            }
+            if(entityChildlight){
+                console.log('intensidad: ', entityChildlight);
+                entityChildlight.setAttribute('intensity', newSize);
+                entity.setAttribute('geometry', 'radius','0.05');
+                entityChild.setAttribute('position', '0 1 0');
+
+                step = null;
+            }
+            
+        } 
+    
+
+        // Función para crear el torus y elementos asociados
+        function createTorus() {
+            // podriamos solicitar entity para hacer lo mismo que en los nombres del ID
+            const group = document.createElement('a-entity');
+            group.setAttribute('id', 'edit');
+
+            // Crear el torus
+            const torusElement = document.createElement('a-torus');
+            torusElement.setAttribute('rotation', '90 0 0');
+            torusElement.setAttribute('position', '0 -1 0');
+            torusElement.setAttribute('radius', '1.25');
+            torusElement.setAttribute('radius-tubular', '0.025');
+            torusElement.setAttribute('material', 'color: #b2ff00; emissive: green;');
+        
+            // Crear el cilindro en la posición del torus con los mismos parámetros
+            const cylinderElement = document.createElement('a-cylinder');
+            cylinderElement.setAttribute('position', '0 0.5 0'); // Mismo centro que el torus
+            cylinderElement.setAttribute('height', '3');  // Altura del cilindro
+            cylinderElement.setAttribute('radius', '1.1'); // Radio del cilindro
+            cylinderElement.setAttribute('material', 'color: #b2ff00; emissive: green;'); // Color del cilindro
+            cylinderElement.setAttribute('opacity', '0.15'); // Opacidad del cilindro
+            cylinderElement.setAttribute('shadow', ''); // Habilitar sombra
+        
+            // Agregar el torus y el cilindro al grupo
+            group.appendChild(cylinderElement);
+            group.appendChild(torusElement);
+        
+            return group;
         }
 
         // Escuchar eventos de transcripción para editar el objeto
         inputElement.addEventListener('transcription', (event) => {
-            const transcript = event.detail.transcription.toLowerCase().replace(/\.$/, '');
+            const transcript = event.detail.transcription.trim().toLowerCase().replace(/\.$/, '');
 
             if (!entityToEdit) {
                 // Pedir el ID del objeto a editar
@@ -662,62 +909,84 @@ AFRAME.registerComponent('dynamic-modifier', {
 
                 // Buscar el objeto por ID
                 if (step === 'id') {
+                    // Crear el torus
+                    const torusElement = createTorus();
+
+                    // Buscar el objeto por ID
                     entityToEdit = getEntityById(transcript);
+                    
                     if (entityToEdit) {
+                        // Añadir el torus al objeto para su edición
+                        entityToEdit.appendChild(torusElement);
                         updateUserMessage(`Editando el objeto ${entityToEdit.id}. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)`);
                     } else {
                         updateUserMessage('No se encontró un objeto con ese ID. ¿Intentamos de nuevo?');
                     }
-                    step = null; // Reseteamos el paso después de encontrar el objeto
+
+                    // Resetear paso después de encontrar el objeto
+                    step = null;
                 }
             } else {
                 // Procesar los cambios según el paso
                 if (step) {
                     const stepActions = {
-                      'x': () => stepsPOS('x', entityToEdit, transcript),
-                      'y': () => stepsPOS('y', entityToEdit, transcript),
-                      'z': () => stepsPOS('z', entityToEdit, transcript),
-                      'x-rot': () => stepsROT('x', entityToEdit, transcript),
-                      'y-rot': () => stepsROT('y', entityToEdit, transcript),
-                      'z-rot': () => stepsROT('z', entityToEdit, transcript),
-                      'size': () => stepSIZE(entityToEdit, transcript),
-                      'color': () => stepCOLOR(entityToEdit, transcript),
-                      'id': () => stepID(entityToEdit, transcript),
+                        'x': () => stepsPOS('x', entityToEdit, transcript),
+                        'y': () => stepsPOS('y', entityToEdit, transcript),
+                        'z': () => stepsPOS('z', entityToEdit, transcript),
+                        'x-rot': () => stepsROT('x', entityToEdit, transcript),
+                        'y-rot': () => stepsROT('y', entityToEdit, transcript),
+                        'z-rot': () => stepsROT('z', entityToEdit, transcript),
+                        'size': () => stepSIZE(entityToEdit, transcript),
+                        'color': () => stepCOLOR(entityToEdit, transcript),
+                        'id': () => stepID(entityToEdit, transcript),
                     };
-          
+
                     if (stepActions[step]) {
-                      stepActions[step]();
+                        stepActions[step]();
                     }
                     return;
-                  }
-          
-                  // Detección de palabras clave
-                  const keywordActions = {
+                }
+
+                // Detección de palabras clave
+                const keywordActions = {
                     'posición': { step: 'x', message: '¿Qué valor para POS en X?' },
                     'rotación': { step: 'x-rot', message: '¿Qué valor para ROT en X?' },
                     'tamaño': { step: 'size', message: '¿Qué tamaño?' },
                     'color': { step: 'color', message: '¿Qué color?' },
                     'id': { step: 'id', message: '¿Qué ID?' },
-                    'cambio': { exit: true },  // Salir del modo de modificación pero permitir crear nuevo objeto
-                  };
-          
-                    for (const keyword in keywordActions) {
-                        if (transcript.includes(keyword)) {
-                            if (keywordActions[keyword].exit) {
-                                console.log('Saliendo del modo modificación');
-                                updateUserMessage(`Se ha terminado de editar el objeto: ${entityToEdit.id}`);
-                                scene.emit('exit-create-mode');
-                                                // Mostrar otro mensaje después de 3 segundos
-                                setTimeout(function() {
-                                    updateUserMessage("Reconociemiento de voz activado ...");
-                                }, 3000);  // 3000ms = 3 segundos
-                            } else {
-                                step = keywordActions[keyword].step;
-                                updateUserMessage(keywordActions[keyword].message);
+                    'cambio': { exit: true },  // Salir del modo de modificación
+                };
+
+                for (const keyword in keywordActions) {
+                    if (transcript.includes(keyword)) {
+                        if (keywordActions[keyword].exit) {
+                            // Eliminar el torus cuando se sale del modo de edición
+                            if (entityToEdit) {
+                                const torusToRemove = entityToEdit.querySelector('#edit');
+                                if (torusToRemove) {
+                                    entityToEdit.removeChild(torusToRemove);
+                                }
                             }
-                            return;
+                            
+                            console.log('Saliendo del modo modificación');
+                            updateUserMessage(`Se ha terminado de editar el objeto: ${entityToEdit ? entityToEdit.id : 'desconocido'}`);
+                            scene.emit('exit-create-mode');
+
+                            // Limpiar estado
+                            entityToEdit = null;
+                            step = null;
+
+                            // Mostrar otro mensaje después de 3 segundos
+                            setTimeout(function () {
+                                updateUserMessage("Reconocimiento de voz activado...");
+                            }, 3000);  // 3000ms = 3 segundos
+                        } else {
+                            step = keywordActions[keyword].step;
+                            updateUserMessage(keywordActions[keyword].message);
                         }
+                        return;
                     }
+                }
             }
         });
     },
