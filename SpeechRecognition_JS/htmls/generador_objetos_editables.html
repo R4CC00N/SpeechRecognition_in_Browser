@@ -11,12 +11,25 @@
 </head>
 <body>
     <a-scene>
+        <a-assets>
+            <a-asset-item id="contenedor" src="../assets/contenedor.glb"></a-asset-item>
+            <a-asset-item id="radio" src="../assets/radio.glb"></a-asset-item>
+        </a-assets>
         <!-- Cielo de fondo -->
         <a-sky  color="#D3D3D3" sky-manager></a-sky>
-
+        
+        <!--LOOK AT-->
         <!-- Plano de texto para mostrar la transcripción en 3D -->
         <a-plane position="0 5 -45" width="16" height="6" color="white" transcription-display="input: #voiceInputBox" look-at="[camera]">
             <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1" width="25" 
+            font=""></a-text>
+        </a-plane>
+
+                <!--LOOK AT-->
+        <!-- Plano de texto para mostrar la transcripción en 3D -->
+        <a-plane position="45 5 5" width="9" height="16" color="white" look-at="[camera]">
+            <a-text value="INFORMATION" align="center" color="black" position="0 10 0" width="25"></a-text>
+            <a-text id="typeMessage" value="..." align="center" color="black" position="0 0 0.1" width="25" 
             font=""></a-text>
         </a-plane>
 
@@ -27,13 +40,14 @@
         <a-entity id='player' movement-controls="fly: false" position="0 0 -1">
             <a-entity  camera position="0 2 4" look-controls wasd-controls>
                 <!-- Elemento de entrada interactivo con input-text -->
-                <!--LOOK AT-->
-                <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"             
+                <a-box id="voiceInputBox" position="0 -2 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"             
                 animation="startEvents: click; property: scale;
                 from: 2 2 2; to: 1 1 1; dur: 1000"
-                input-text="event: click">
+                input-text="event: click"
+                look-at="[camera]">
                     <a-text value="Pulsa para grabar/detener" align="center" position="0 0 0.1" color="black" width="3"></a-text>
                 </a-box>
+                <a-text value="Say Help for commands" position="0.8 -0.65 -1" color="black" width="1"></a-text>
             </a-entity>
             <a-entity cursor="rayOrigin: mouse"></a-entity>
             <!-- Controlador de mano derecha -->
@@ -43,11 +57,11 @@
         <!-- Componente de manejo de comandos que escucha al elemento con ID "voiceInputBox" -->
         <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>
         <a-entity id="object" object-creator="input: #create"></a-entity>
+
         <!-- Componente dynamic-modifier para manejar modificaciones dinámicas -->
-        <a-entity id="functions" common-functions></a-entity>
         <a-entity id="dynamic-modifier" dynamic-modifier="input: #voiceInputBox"></a-entity>
         <a-entity id="edit" edit-mode-handler="input: #voiceInputBox"></a-entity>
-        
+        <a-entity id="delete" delete-object="input: #voiceInputBox"></a-entity>
 
         <!-- LUCES -->
         <a-light type="ambient" color="white" intensity="0.3"></a-light>
@@ -55,13 +69,13 @@
 
         <!-- Cubo -->
         <a-box id="pepe" position="-2 0 -15" color="#4CC3D9"  scale="1 1 1">
-            <a-text value="pepe" align="center" position="0 1 0.3" color="black" width="10"></a-text>
+            <a-text value="pepe" align="center" position="0 1 0" color="black" width="10" look-at="[camera]"></a-text>
         </a-box>
 
 
         <!-- Esfera -->
         <a-sphere id="paco" position="2 0 -15" radius="1.25" color="#EF2D5E">
-            <a-text value="paco" align="center" position="0 2 0.3" color="black" width="10"></a-text>
+            <a-text value="paco" align="center" position="0 2 0" color="black" width="10" look-at="[camera]"></a-text>
         </a-sphere>
         
         
