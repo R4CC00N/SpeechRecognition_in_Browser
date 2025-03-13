@@ -16,21 +16,26 @@
             <a-asset-item id="radio" src="../assets/radio.glb"></a-asset-item>
         </a-assets>
         <!-- Cielo de fondo -->
-        <a-sky  color="#D3D3D3" sky-manager></a-sky>
+        <a-sky  color="#D3D3D3"></a-sky>
         
         <!--LOOK AT-->
         <!-- Plano de texto para mostrar la transcripción en 3D -->
-        <a-plane position="0 5 -45" width="16" height="6" color="white" transcription-display="input: #voiceInputBox" look-at="[camera]">
-            <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1" width="25" 
-            font=""></a-text>
+        <a-plane position="0 5 -45" width="17" height="7" color="black" look-at="[camera]"sky-manager>
+            <a-plane position="0 0 0.3" width="16" height="6" color="white" transcription-display="input: #voiceInputBox">
+                <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1" width="25" 
+                font=""></a-text>
+            </a-plane>
         </a-plane>
+
 
                 <!--LOOK AT-->
         <!-- Plano de texto para mostrar la transcripción en 3D -->
-        <a-plane position="45 5 5" width="9" height="16" color="white" look-at="[camera]">
-            <a-text value="INFORMATION" align="center" color="black" position="0 10 0" width="25"></a-text>
-            <a-text id="typeMessage" value="..." align="center" color="black" position="0 0 0.1" width="25" 
-            font=""></a-text>
+        <a-plane position="25 5 -45" width="13" height="13" color="black" look-at="[camera]" sky-manager>
+            <a-plane position="0 0 0.3" width="12" height="12" color="white" >
+                <a-text value="INFORMATION" align="center" color="black" position="0 8 0" width="25"></a-text>
+                <a-text id="typeMessage" value="..." align="center" color="black" position="0 0 0.1" width="20" 
+                font=""></a-text>
+            </a-plane>
         </a-plane>
 
         <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
@@ -64,8 +69,8 @@
         <a-entity id="delete" delete-object="input: #voiceInputBox"></a-entity>
 
         <!-- LUCES -->
-        <a-light type="ambient" color="white" intensity="0.3"></a-light>
-        <a-light type="point" position="0 3 0" intensity="0.3" color="#6f6f6f"></a-light>
+        <a-light type="ambient" color="white" intensity="0.5"></a-light>
+        <a-light type="point" position="0 3 -15" intensity="0.9" color="#6f6f6f"></a-light>
 
         <!-- Cubo -->
         <a-box id="pepe" position="-2 0 -15" color="#4CC3D9"  scale="1 1 1">

@@ -21,7 +21,8 @@ function stepsPOS(posKey, entity, transcript) {
 
     // Avanza al siguiente eje
     step = posKey === 'x' ? 'y' : posKey === 'y' ? 'z' : null;
-    updateUserMessage(step ? `¿Qué valor en POS ${step}?` : 'Posición completa. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+    updateUserMessage(step ? `¿Qué valor en POS ${step}?` : 'Posición completa. ¿Qué valores quieres modificar?','msg');
+    updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
     } else {
     updateUserMessage(`Por favor, dime un número para POS ${posKey}.`,'msg');
     }
@@ -42,7 +43,8 @@ function stepsROT(posKey, entity, transcript) {
         console.log(entity)
         // Avanzar al siguiente eje
         step = posKey === 'x' ? 'y-rot' : posKey === 'y' ? 'z-rot' : null;
-        updateUserMessage(step ? `¿Qué valor en ${step}?` : 'Rotación completa. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+        updateUserMessage(step ? `¿Qué valor en ${step}?` : 'Rotación completa. ¿Qué valores quieres modificar?','msg');
+        updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
     } else {
         updateUserMessage(`Por favor, dime un número para ROT ${posKey}.`,'msg');
     }
@@ -72,7 +74,8 @@ function stepCOLOR(entity, transcript) {
           }
       
           step = null;
-          updateUserMessage('Color modificado. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+          updateUserMessage('Color modificado. ¿Qué valores quieres modificar?','msg');
+          updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
       } else {
           updateUserMessage('Por favor, dime un color válido para el objeto.','msg');
       }
@@ -89,7 +92,8 @@ function stepID(entity, transcript) {
         entityChild.setAttribute('value', entity.id);
     }
     step = null;
-    updateUserMessage('ID modificado. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+    updateUserMessage('ID modificado. ¿Qué valores quieres modificar?','msg');
+    updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
 }
         
 // Captura de tamaño
@@ -108,7 +112,8 @@ function stepSIZE(entity, transcript) {
         });
         entity.setAttribute('geometry', entity.components.geometry.oldData);
         step = null;
-        updateUserMessage('Tamaño modificado. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+        updateUserMessage('Tamaño modificado. ¿Qué valores quieres modificar?','msg');
+        updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
     } else {
         updateUserMessage('Por favor, dime un tamaño para el objeto.','msg');
     }
@@ -337,6 +342,35 @@ AFRAME.registerComponent('input-text', {
         }
 });
 
+// Componente de visualización de transcripción
+AFRAME.registerComponent('transcription-display', {
+    schema: {
+        input: { type: 'selector', default: null }, // Selector del elemento que genera transcripciones
+    },
+
+    init: function () {
+        const el = this.el;
+        const inputElement = this.data.input;
+
+        if (!inputElement) {
+            console.error('No se ha especificado un elemento de entrada para transcription-display');
+            return;
+        }
+
+        // Escuchar eventos de transcripción desde el elemento especificado
+        inputElement.addEventListener('transcription', (event) => {
+            const transcript = event.detail.transcription;
+            const planeText = el.querySelector('#transcriptionText');
+
+            if (planeText) {
+                planeText.setAttribute('value', transcript);
+            } else {
+                console.warn('No se encontró a-text dentro de transcription-display para mostrar la transcripción');
+            }
+        });
+    }
+});
+
 AFRAME.registerComponent('command-handler', {
     schema: {
         input: { type: 'selector', default: null },
@@ -360,8 +394,7 @@ AFRAME.registerComponent('command-handler', {
             console.log('Comando recibido Manejador:', transcript);
 
             // Bloqueo si estamos modificando un objeto
-            if (modifyingBox || modifyingSphere) return;
-
+            if (modifyingBox || modifyingSphere|| modifyingPlane|| modifyingConteiner|| modifyingLight|| modifyingCylinder|| modifyingRadio) return;
             // Si estamos en modo crear y ya dijimos "crear", permitimos avanzar
             if (currentCommand && !['crear', 'assets'].includes(currentCommand)) {
                 // Si no es salir/atrás, ignorar nuevos comandos
@@ -375,6 +408,7 @@ AFRAME.registerComponent('command-handler', {
             if (transcript.includes('salir') || transcript.includes('atrás')|| transcript.includes('cambio')) {
                 currentCommand = null;
                 updateUserMessage('Saliendo del modo actual.', 'msg');
+                updateUserMessage('...', 'info');
                 scene.emit('exit-create-mode');
                 return;
             }
@@ -382,7 +416,8 @@ AFRAME.registerComponent('command-handler', {
             // INICIO DE MODO CREAR
             if (transcript.includes('crear') && currentCommand !== 'crear') {
                 currentCommand = 'crear';
-                updateUserMessage('Dime qué objeto crear (cubo, esfera, plano, cilindro, luz, assets)', 'msg');
+                updateUserMessage('Dime qué objeto crear:', 'msg');
+                updateUserMessage('cubo\nesfera\nplano\ncilindro\nluz\nassets', 'info');
                 scene.emit('enter-create-mode');
                 return;
             }
@@ -400,7 +435,7 @@ AFRAME.registerComponent('command-handler', {
             if (currentCommand === 'crear' && transcript.includes('assets')) {
                 currentCommand = 'assets';
                 updateUserMessage(`¿Qué asset quieres crear?`, 'msg');
-                updateUserMessage(`Assets disponibles: ${assets.join(', ')}`, 'info');
+                updateUserMessage(`Assets disponibles:\n- ${assets.join('\n- ')}`, 'info');
                 return;
             }
 
@@ -429,19 +464,13 @@ AFRAME.registerComponent('command-handler', {
             // AYUDA
             if (transcript.includes('ayuda') || transcript.includes('help') || transcript.includes('comandos')) {
                 currentCommand = 'help';
-                updateUserMessage(`Estos son los comandos disponibles:
-                * CREAR
-                * EDITAR
-                * ELIMINAR
-                * AYUDA
-                * "salir" o "atrás" para cancelar`, 'info');
+                updateUserMessage(`Estos son los\ncomandos disponibles:\n* CREAR\n* EDITAR\n* ELIMINAR\n* AYUDA\n* SALIR/ATRAS/CAMBIO\npara volver`, 'info');
                 scene.emit('help-mode');
                 return;
             }
         });
     }
 });
-
 
 AFRAME.registerComponent('delete-object', {
     schema: {
@@ -467,7 +496,10 @@ AFRAME.registerComponent('delete-object', {
                     step = 'idDel';
                     return;
                 }
-
+                if (transcript.includes('crear') || transcript.includes('editar')) {
+                    updateUserMessage('No puedes editar ni crear mientras estás en modo de eliminar.', 'warn');
+                    return;
+                }
                 if (step === 'idDel') {
                     const torusElement = createTorus();
                     entityToDel = getEntityById(transcript);
@@ -475,8 +507,17 @@ AFRAME.registerComponent('delete-object', {
                     if (entityToDel) {
                         entityToDel.appendChild(torusElement);
                         updateUserMessage(`¿Estás seguro que quieres eliminar ${entityToDel.id}? (Sí / No)`, 'msg');
-                    } else {
+                    } else if (transcript.includes('cambio')){
+                        updateUserMessage('Accion finalizando...', 'msg');
+                        // Mostrar otro mensaje después de 3 segundos
+                        setTimeout(function () {
+                            updateUserMessage("Reconocimiento de voz activado...",'msg');
+                        }, 3000);  // 3000ms = 3 segundos                        
+                    }else {
                         updateUserMessage('No se encontró un objeto con ese ID. ¿Intentamos de nuevo?', 'msg');
+                        setTimeout(function () {
+                            updateUserMessage("Reconocimiento de voz activado...",'msg');
+                        }, 3000);  // 3000ms = 3 segundos   
                     }
 
                     step = null;
@@ -535,35 +576,6 @@ AFRAME.registerComponent('delete-object', {
         });
 
     },
-});
-
-// Componente de visualización de transcripción
-AFRAME.registerComponent('transcription-display', {
-        schema: {
-            input: { type: 'selector', default: null }, // Selector del elemento que genera transcripciones
-        },
-
-        init: function () {
-            const el = this.el;
-            const inputElement = this.data.input;
-
-            if (!inputElement) {
-                console.error('No se ha especificado un elemento de entrada para transcription-display');
-                return;
-            }
-
-            // Escuchar eventos de transcripción desde el elemento especificado
-            inputElement.addEventListener('transcription', (event) => {
-                const transcript = event.detail.transcription;
-                const planeText = el.querySelector('#transcriptionText');
-
-                if (planeText) {
-                    planeText.setAttribute('value', transcript);
-                } else {
-                    console.warn('No se encontró a-text dentro de transcription-display para mostrar la transcripción');
-                }
-            });
-        }
 });
 
 // Componente para crear objetos
@@ -726,7 +738,7 @@ AFRAME.registerComponent('object-creator', {
                         distance: 0,
                         decay: 1
                     },
-                    position: { x: 2, y: 0, z: -3 },
+                    position: { x: 0, y: 0, z: 0 },
                     rotation: { x: 0, y: 0, z: 0 },
                     geometry: {
                         primitive: 'sphere',
@@ -841,7 +853,8 @@ AFRAME.registerComponent('dynamic-modifier', {
         function handleModification(modifyingFlag, objectType) {
           if (!modifyingFlag) return;
   
-          updateUserMessage('¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)','msg');
+          updateUserMessage('¿Qué valores quieres modificar?','msg');
+          updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
   
           if (step) {
             console.log('entidad: ',entity)
@@ -885,6 +898,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                         modifyingConteiner = false;
                         modifyingRadio = false;
                         updateUserMessage(`Se ha terminado de modificar el ${objectType}`,'msg');
+                        updateUserMessage('...', 'info');
                         scene.emit('exit-create-mode');
                                         // Mostrar otro mensaje después de 3 segundos
                         setTimeout(function() {
@@ -932,41 +946,6 @@ AFRAME.registerComponent('edit-mode-handler', {
         const scene = document.querySelector('a-scene');
         let entityToEdit = null; // Objeto a editar
 
-        // Obtener objeto por ID
-        function getEntityById(id) {
-            return document.querySelector(`#${id}`);
-        }
-
-        // Función para crear el torus y elementos asociados
-        function createTorus() {
-            // podriamos solicitar entity para hacer lo mismo que en los nombres del ID
-            const group = document.createElement('a-entity');
-            group.setAttribute('id', 'edit');
-
-            // Crear el torus
-            const torusElement = document.createElement('a-torus');
-            torusElement.setAttribute('rotation', '90 0 0');
-            torusElement.setAttribute('position', '0 -1 0');
-            torusElement.setAttribute('radius', '1.25');
-            torusElement.setAttribute('radius-tubular', '0.025');
-            torusElement.setAttribute('material', 'color: #b2ff00; emissive: green;');
-        
-            // Crear el cilindro en la posición del torus con los mismos parámetros
-            const cylinderElement = document.createElement('a-cylinder');
-            cylinderElement.setAttribute('position', '0 0.5 0'); // Mismo centro que el torus
-            cylinderElement.setAttribute('height', '3');  // Altura del cilindro
-            cylinderElement.setAttribute('radius', '1.1'); // Radio del cilindro
-            cylinderElement.setAttribute('material', 'color: #b2ff00; emissive: green;'); // Color del cilindro
-            cylinderElement.setAttribute('opacity', '0.15'); // Opacidad del cilindro
-            cylinderElement.setAttribute('shadow', ''); // Habilitar sombra
-        
-            // Agregar el torus y el cilindro al grupo
-            group.appendChild(cylinderElement);
-            group.appendChild(torusElement);
-        
-            return group;
-        }
-
         // Escuchar eventos de transcripción para editar el objeto
         inputElement.addEventListener('transcription', (event) => {
             const transcript = event.detail.transcription.trim().toLowerCase().replace(/\.$/, '');
@@ -990,9 +969,13 @@ AFRAME.registerComponent('edit-mode-handler', {
                     if (entityToEdit) {
                         // Añadir el torus al objeto para su edición
                         entityToEdit.appendChild(torusElement);
-                        updateUserMessage(`Editando el objeto ${entityToEdit.id}. ¿Qué valores quieres modificar? (Posición, Rotación, Tamaño, Color, ID)`,'msg');
+                        updateUserMessage(`Editando el objeto ${entityToEdit.id}. ¿Qué valores quieres modificar?`,'msg');
+                        updateUserMessage('Posición\nRotación\nTamaño\nColor\nID', 'info');
                     } else {
                         updateUserMessage('No se encontró un objeto con ese ID. ¿Intentamos de nuevo?','msg');
+                        setTimeout(function () {
+                            updateUserMessage("Reconocimiento de voz activado...",'msg');
+                        }, 3000);  // 3000ms = 3 segundos   
                     }
 
                     // Resetear paso después de encontrar el objeto
