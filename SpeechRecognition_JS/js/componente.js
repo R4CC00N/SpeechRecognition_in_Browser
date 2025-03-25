@@ -594,65 +594,50 @@ AFRAME.registerComponent('command-handler', {
         const components = ['cubo', 'esfera', 'plano', 'cilindro', 'luz'];
         const assets = ['contenedor', 'radio'];
         let currentCommand = null;
-        let isProcessing = false;  // Nueva variable para controlar el estado de procesamiento
 
         if (!inputElement) {
             console.error('No se ha especificado un elemento de entrada para command-handler');
             return;
         }
 
-        // Función para manejar el fin de un comando
-        const finishCommand = () => {
-            isProcessing = false;
-            currentCommand = null;
-            updateUserMessage('Comando completado', 'msg');
-            updateUserMessage('...', 'info');
-        };
-
-        // Escuchar eventos de finalización de comandos
-        scene.addEventListener('object-created', finishCommand);
-        scene.addEventListener('edit-completed', finishCommand);
-        scene.addEventListener('delete-completed', finishCommand);
-
         inputElement.addEventListener('transcription', (event) => {
             const transcript = event.detail.transcription.toLowerCase();
             console.log('Comando recibido Manejador:', transcript);
 
-            // Bloqueo si estamos modificando un objeto o procesando un comando
-            if (modifyingBox || modifyingSphere || modifyingPlane || modifyingConteiner || 
-                modifyingLight || modifyingCylinder || modifyingRadio || isProcessing) {
-                updateUserMessage('Espera a que termine el comando actual', 'msg');
-                return;
+            // Bloqueo si estamos modificando un objeto
+            if (modifyingBox || modifyingSphere|| modifyingPlane|| modifyingConteiner|| modifyingLight|| modifyingCylinder|| modifyingRadio) return;
+            // Si estamos en modo crear y ya dijimos "crear", permitimos avanzar
+            if (currentCommand && !['crear', 'assets'].includes(currentCommand)) {
+                // Si no es salir/atrás, ignorar nuevos comandos
+                if (!transcript.includes('salir') && !transcript.includes('atrás') && !transcript.includes('cambio')) {
+                    console.log(`Comando ignorado. Ya hay uno activo: ${currentCommand}`);
+                    return;
+                }
             }
-
-            // SALIR o ATRÁS — siempre permitido para cancelar cualquier modo
-            if (transcript.includes('salir') || transcript.includes('atrás') || transcript.includes('cambio')) {
-                isProcessing = false;
+            // SALIR o ATRÁS — cancelar cualquier modo activo
+            if (transcript.includes('salir') || transcript.includes('atrás')|| transcript.includes('cambio')) {
                 currentCommand = null;
                 updateUserMessage('Saliendo del modo actual.', 'msg');
                 updateUserMessage('...', 'info');
                 scene.emit('exit-create-mode');
                 return;
             }
-
             // INICIO DE MODO CREAR
-            if (transcript.includes('crear') && !currentCommand) {
-                isProcessing = true;
+            if (transcript.includes('crear') && currentCommand !== 'crear') {
                 currentCommand = 'crear';
                 updateUserMessage('Dime qué objeto crear:', 'msg');
                 updateUserMessage('cubo\nesfera\nplano\ncilindro\nluz\nassets', 'info');
                 scene.emit('enter-create-mode');
                 return;
             }
-
             // MODO CREAR: elección de componente
             if (currentCommand === 'crear' && components.some((comp) => transcript.includes(comp))) {
                 const objectType = components.find((comp) => transcript.includes(comp));
                 updateUserMessage(`Creando un ${objectType}.`, 'msg');
                 scene.emit('start-object-creation', { type: objectType });
+                currentCommand = null; // Fin de creación
                 return;
             }
-
             // MODO CREAR: assets
             if (currentCommand === 'crear' && transcript.includes('assets')) {
                 currentCommand = 'assets';
@@ -660,32 +645,25 @@ AFRAME.registerComponent('command-handler', {
                 updateUserMessage(`Assets disponibles:\n- ${assets.join('\n- ')}`, 'info');
                 return;
             }
-
             if (currentCommand === 'assets' && assets.some((asset) => transcript.includes(asset))) {
                 const objectType = assets.find((asset) => transcript.includes(asset));
                 updateUserMessage(`Creando un ${objectType}.`, 'msg');
                 scene.emit('start-object-creation', { type: objectType });
+                currentCommand = null;
                 return;
             }
-
             // EDITAR
-            if (transcript.includes('editar') && !currentCommand) {
-                isProcessing = true;
+            if (transcript.includes('editar')) {
                 currentCommand = 'editar';
-                updateUserMessage('Modo edición activado', 'msg');
                 scene.emit('edit-mode');
                 return;
             }
-
             // ELIMINAR
-            if (transcript.includes('eliminar') && !currentCommand) {
-                isProcessing = true;
+            if (transcript.includes('eliminar')) {
                 currentCommand = 'eliminar';
-                updateUserMessage('Modo eliminación activado', 'msg');
                 scene.emit('delete-mode');
                 return;
             }
-
             // AYUDA
             if (transcript.includes('ayuda') || transcript.includes('help') || transcript.includes('comandos')) {
                 currentCommand = 'help';
@@ -693,40 +671,141 @@ AFRAME.registerComponent('command-handler', {
                 scene.emit('help-mode');
                 return;
             }
-
             // GUARDAR ESCENA
-            if (transcript.includes('guardar') && !currentCommand) {
-                isProcessing = true;
+            if (transcript.includes('guardar')) {
                 updateUserMessage('Guardando la escena actual...', 'msg');
 
                 if (typeof saveScene === 'function') {
-                    saveScene();
+                    saveScene(); // llamada a scene-saver
                     updateUserMessage('Escena guardada exitosamente.', 'info');
                 } else {
                     updateUserMessage('Error: No se pudo guardar la escena.', 'info');
                 }
 
-                finishCommand();
+                currentCommand = null;
                 return;
             }
-
-            // CARGAR ESCENA
-            if ((transcript.includes('cargar escena') || transcript.includes('cargar')) && !currentCommand) {
-                isProcessing = true;
+             // CARGAR ESCENA
+            if (transcript.includes('cargar escena') || transcript.includes('cargar')) {
                 updateUserMessage('Cargando la escena...', 'msg');
-                
                 if (typeof loadSceneFromStorage === 'function') {
-                    loadSceneFromStorage();
+                    loadSceneFromStorage(); // Llamar al cargador
                     updateUserMessage('Escena cargada exitosamente.', 'info');
                 } else {
                     updateUserMessage('Error: No se pudo cargar la escena.', 'info');
                 }
-
-                finishCommand();
+                currentCommand = null;
                 return;
             }
+
         });
     }
+});
+
+AFRAME.registerComponent('delete-object', {
+    schema: {
+        input: { type: 'selector', default: null },
+    },
+
+    init: function () {
+        const inputElement = this.data.input;
+        const scene = document.querySelector('a-scene');
+        let entityToDel = null; // Objeto a editar
+
+        // Variables de estado FUERA del listener
+        let deleteConfirmed = false;
+        let deleteCancelled = false;
+        let step = null;
+
+        inputElement.addEventListener('transcription', (event) => {
+            let transcript = event.detail.transcription.trim().toLowerCase().replace(/\.$/, '');
+
+            if (!entityToDel) {
+                if (transcript.includes('eliminar')) {
+                    updateUserMessage('Por favor, dime el ID del objeto que quieres eliminar.', 'msg');
+                    step = 'idDel';
+                    return;
+                }
+                if (transcript.includes('crear') || transcript.includes('editar')) {
+                    updateUserMessage('No puedes editar ni crear mientras estás en modo de eliminar.', 'warn');
+                    return;
+                }
+                if (step === 'idDel') {
+                    const torusElement = createTorus();
+                    entityToDel = getEntityById(transcript);
+
+                    if (entityToDel) {
+                        entityToDel.appendChild(torusElement);
+                        updateUserMessage(`¿Estás seguro que quieres eliminar ${entityToDel.id}? (Sí / No)`, 'msg');
+                    } else if (transcript.includes('cambio')){
+                        updateUserMessage('Accion finalizando...', 'msg');
+                        // Mostrar otro mensaje después de 3 segundos
+                        setTimeout(function () {
+                            updateUserMessage("Reconocimiento de voz activado...",'msg');
+                        }, 3000);  // 3000ms = 3 segundos                        
+                    }else {
+                        updateUserMessage('No se encontró un objeto con ese ID. ¿Intentamos de nuevo?', 'msg');
+                        setTimeout(function () {
+                            updateUserMessage("Reconocimiento de voz activado...",'msg');
+                        }, 3000);  // 3000ms = 3 segundos   
+                    }
+
+                    step = null;
+                    return;
+                }
+            } else {
+                // Confirmación de eliminación
+                if (!deleteConfirmed && !deleteCancelled) {
+                    if (transcript.includes('sí')) {
+                        deleteConfirmed = true;
+                        updateUserMessage(`${entityToDel.id} eliminado`, 'msg');
+                        
+                        // Eliminar torus antes de borrar
+                        const torusToRemove = entityToDel.querySelector('#edit');
+                        if (torusToRemove) {
+                            entityToDel.removeChild(torusToRemove);
+                        }
+
+                        entityToDel.parentNode.removeChild(entityToDel);
+
+                        setTimeout(() => {
+                            updateUserMessage("Diga 'salir', 'atrás' o 'cambio' para volver", 'msg');
+                        }, 3000);
+                        return;
+                    } else if (transcript.includes('no')) {
+                        deleteCancelled = true;
+                        updateUserMessage("Eliminación cancelada. Diga 'salir', 'atrás' o 'cambio' para volver", 'msg');
+                        return;
+                    }
+                }
+
+                // Comandos para salir del modo
+                const exitWords = ['salir', 'atrás', 'cambio'];
+                if (exitWords.some(word => transcript.includes(word))) {
+                    // Eliminar torus si queda
+                    if (entityToDel) {
+                        const torusToRemove = entityToDel.querySelector('#edit');
+                        if (torusToRemove) {
+                            entityToDel.removeChild(torusToRemove);
+                        }
+                        updateUserMessage(`Finalizando eliminación de ${entityToDel.id}`, 'msg');
+                    }
+
+                    entityToDel = null;
+                    deleteConfirmed = false;
+                    deleteCancelled = false;
+                    step = null;
+
+                    scene.emit('exit-create-mode');
+
+                    setTimeout(() => {
+                        updateUserMessage("Reconocimiento de voz activado...", 'msg');
+                    }, 3000);
+                }
+            }
+        });
+
+    },
 });
 
 // Componente para crear objetos
@@ -1053,7 +1132,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                         updateUserMessage('...', 'info');
                         scene.emit('exit-create-mode');
                                         // Mostrar otro mensaje después de 3 segundos
-                        setTimeout(function () {
+                        setTimeout(function() {
                             updateUserMessage("Reconociemiento de voz activado ...",'msg');
                         }, 3000);  // 3000ms = 3 segundos
                     } else {
@@ -1186,7 +1265,7 @@ AFRAME.registerComponent('edit-mode-handler', {
                             // Mostrar otro mensaje después de 3 segundos
                             setTimeout(function () {
                                 updateUserMessage("Reconocimiento de voz activado...",'msg');
-                            }, 3000);
+                            }, 3000);  // 3000ms = 3 segundos
                         } else {
                             step = keywordActions[keyword].step;
                             updateUserMessage(keywordActions[keyword].message,'msg');
@@ -1421,3 +1500,4 @@ AFRAME.registerComponent('scene-loader', {
         };
     }
 });
+
