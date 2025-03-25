@@ -1,3 +1,202 @@
+AFRAME.registerComponent('scene-creator', {
+    init: function () {
+        // ------------------------
+        // Verificar o crear <a-assets>
+        // Buscar la escena principal y añadirle los assets
+        // ------------------------
+        let scene = document.querySelector('a-scene');
+        if (scene) {
+            let assets = scene.querySelector('a-assets');
+            if (!assets) {
+                assets = document.createElement('a-assets');
+                scene.appendChild(assets);
+            }
+
+            const contenedorAsset = document.createElement('a-asset-item');
+            contenedorAsset.setAttribute('id', 'contenedor');
+            contenedorAsset.setAttribute('src', '../assets/contenedor.glb');
+
+            const radioAsset = document.createElement('a-asset-item');
+            radioAsset.setAttribute('id', 'radio');
+            radioAsset.setAttribute('src', '../assets/radio.glb');
+
+            assets.appendChild(contenedorAsset);
+            assets.appendChild(radioAsset);
+        } else {
+            console.warn('No se encontró <a-scene>, no se pudieron añadir los assets.');
+        }
+
+        // ------------------------
+        // Entidades dinámicas
+        // ------------------------
+        const entities = [
+            { id: 'create', component: 'command-handler' },
+            { id: 'object', component: 'object-creator', input: '#create' },
+            { id: 'dynamic-modifier', component: 'dynamic-modifier' },
+            { id: 'edit', component: 'edit-mode-handler' },
+            { id: 'delete', component: 'delete-object' },
+            { id: 'saver', component: 'scene-saver' },
+            { id: 'loader', component: 'scene-loader' }
+        ];
+        entities.forEach(({ id, component, input = '#voiceInputBox' }) => {
+            const e = document.createElement('a-entity');
+            e.setAttribute('id', id);
+            e.setAttribute(component, `input: ${input}`);
+            this.el.appendChild(e);
+        });
+
+        // ------------------------
+        // Panel de Transcripción
+        // ------------------------
+        const transPanel = document.createElement('a-plane');
+        transPanel.setAttribute('position', '0 15 -45');
+        transPanel.setAttribute('width', '17');
+        transPanel.setAttribute('height', '7');
+        transPanel.setAttribute('color', 'black');
+        transPanel.setAttribute('look-at', '[camera]');
+        transPanel.setAttribute('sky-manager', '');
+
+        const transInner = document.createElement('a-plane');
+        transInner.setAttribute('position', '0 0 0.3');
+        transInner.setAttribute('width', '16');
+        transInner.setAttribute('height', '6');
+        transInner.setAttribute('color', 'white');
+        transInner.setAttribute('transcription-display', 'input: #voiceInputBox');
+
+        const transText = document.createElement('a-text');
+        transText.setAttribute('id', 'transcriptionText');
+        transText.setAttribute('value', '...');
+        transText.setAttribute('align', 'center');
+        transText.setAttribute('color', 'black');
+        transText.setAttribute('position', '0 0 0.1');
+        transText.setAttribute('width', '25');
+        transText.setAttribute('font', '');
+
+        transInner.appendChild(transText);
+        transPanel.appendChild(transInner);
+        this.el.appendChild(transPanel);
+
+        // ------------------------
+        // Mensaje de estado
+        // ------------------------
+        const userMessage = document.createElement('a-text');
+        userMessage.setAttribute('id', 'userMessage');
+        userMessage.setAttribute('value', 'Bienvenido a VOICE VR');
+        userMessage.setAttribute('align', 'center');
+        userMessage.setAttribute('color', 'black');
+        userMessage.setAttribute('position', '0 20 -45');
+        userMessage.setAttribute('width', '25');
+        userMessage.setAttribute('look-at', '[camera]');
+        this.el.appendChild(userMessage);
+
+        // ------------------------
+        // Panel de Información
+        // ------------------------
+        const infoPanel = document.createElement('a-plane');
+        infoPanel.setAttribute('position', '25 15 -45');
+        infoPanel.setAttribute('width', '13');
+        infoPanel.setAttribute('height', '13');
+        infoPanel.setAttribute('color', 'black');
+        infoPanel.setAttribute('look-at', '[camera]');
+        infoPanel.setAttribute('sky-manager', '');
+
+        const infoInner = document.createElement('a-plane');
+        infoInner.setAttribute('position', '0 0 0.3');
+        infoInner.setAttribute('width', '12');
+        infoInner.setAttribute('height', '12');
+        infoInner.setAttribute('color', 'white');
+
+        const infoTitle = document.createElement('a-text');
+        infoTitle.setAttribute('value', 'INFORMATION');
+        infoTitle.setAttribute('align', 'center');
+        infoTitle.setAttribute('color', 'black');
+        infoTitle.setAttribute('position', '0 8 0');
+        infoTitle.setAttribute('width', '25');
+
+        const typeMessage = document.createElement('a-text');
+        typeMessage.setAttribute('id', 'typeMessage');
+        typeMessage.setAttribute('value', '...');
+        typeMessage.setAttribute('align', 'center');
+        typeMessage.setAttribute('color', 'black');
+        typeMessage.setAttribute('position', '0 0 0.1');
+        typeMessage.setAttribute('width', '20');
+        typeMessage.setAttribute('font', '');
+
+        infoInner.appendChild(infoTitle);
+        infoInner.appendChild(typeMessage);
+        infoPanel.appendChild(infoInner);
+        this.el.appendChild(infoPanel);
+
+        // ------------------------
+        // Cursor,InputBox y controladores VR
+        // ------------------------
+        // Crear el cuadro de entrada de voz
+        // Crear el cuadro de entrada de voz
+        const voiceInputBox = document.createElement('a-box');
+        voiceInputBox.setAttribute('id', 'voiceInputBox');
+        voiceInputBox.setAttribute('position', '0 -2 -3');
+        voiceInputBox.setAttribute('depth', '0.15');
+        voiceInputBox.setAttribute('height', '0.25');
+        voiceInputBox.setAttribute('width', '2');
+        voiceInputBox.setAttribute('color', '#8ec3d0');
+        voiceInputBox.setAttribute('animation', 'startEvents: click; property: scale; from: 2 2 2; to: 1 1 1; dur: 1000');
+        voiceInputBox.setAttribute('input-text', 'event: click');  // Componente personalizado (si lo tienes)
+        voiceInputBox.setAttribute('look-at', '#camera');
+
+        // Crear el texto de la caja de entrada de voz
+        const voiceText = document.createElement('a-text');
+        voiceText.setAttribute('value', 'Pulsa para grabar/detener');
+        voiceText.setAttribute('align', 'center');
+        voiceText.setAttribute('position', '0 0 0.1');
+        voiceText.setAttribute('color', 'black');
+        voiceText.setAttribute('width', '3');
+        voiceInputBox.appendChild(voiceText);
+
+        // Crear el jugador con controles de movimiento
+        const player = document.createElement('a-entity');
+        player.setAttribute('id', 'player');
+        player.setAttribute('movement-controls', 'fly: false');
+        player.setAttribute('position', '0 2 -1');
+
+        // Crear el rig de la cámara
+        const cameraRig = document.createElement('a-entity');
+        cameraRig.setAttribute('camera', '');
+        cameraRig.setAttribute('position', '0 2 4');
+        cameraRig.setAttribute('look-controls', '');  // Permite que la cámara siga el movimiento de la cabeza
+        cameraRig.setAttribute('wasd-controls', '');  // Habilita los controles WASD para el movimiento
+
+        // Crear el texto de ayuda
+        const helpText = document.createElement('a-text');
+        helpText.setAttribute('value', 'Say Help for commands');
+        helpText.setAttribute('position', '0.8 -0.65 -1');
+        helpText.setAttribute('color', 'black');
+        helpText.setAttribute('width', '1');
+        cameraRig.appendChild(helpText);
+
+        // Añadir la caja de voz al rig de la cámara
+        cameraRig.appendChild(voiceInputBox);
+
+        // Añadir el rig de la cámara al jugador
+        player.appendChild(cameraRig);
+
+        // Crear el cursor del ratón (interactividad)
+        const mouseCursor = document.createElement('a-entity');
+        mouseCursor.setAttribute('cursor', 'rayOrigin: mouse');
+        player.appendChild(mouseCursor);
+
+        // Crear el controlador de la mano derecha
+        const rightHand = document.createElement('a-entity');
+        rightHand.setAttribute('laser-controls', 'hand: right');
+        rightHand.setAttribute('cursor', 'fuse: true; rayOrigin: controller');
+        player.appendChild(rightHand);
+
+        // Finalmente, añadir el jugador a la escena
+        this.el.appendChild(player);
+
+
+    }
+});
+
 // ------------------------- FUNCIONES -------------------------------
 
 // Función para actualizar el mensaje del usuario
@@ -173,12 +372,24 @@ function getEntityById(id) {
 
 // Obtener la última entidad creada
 function getLastCreatedEntity() {
-  const entities = document.querySelectorAll('a-entity');
-  if (entities.length > 0) {
-    return entities[entities.length - 1]; // Devuelve el último creado
-  }
-  return null; // Si no hay entidades, retorna null
+    const objectCreated = document.querySelector('#objsCreated');
+    
+    if (!objectCreated) {
+        console.warn('El elemento #objsCreated no existe aún. Esperando a que se cree...');
+        // Aquí podrías añadir lógica para esperar y reintentar después de un tiempo
+        setTimeout(getLastCreatedEntity, 1000);  // Reintentar después de 1 segundo
+        return null;
+    }
+
+    const entities = objectCreated.querySelectorAll('a-entity');
+    
+    if (entities.length > 0) {
+        return entities[entities.length - 1];  // Devuelve el último creado
+    }
+    
+    return null;  // Si no hay entidades, retorna null
 }
+
 
 // Función para crear el torus y elementos asociados
 function createTorus() {
@@ -196,7 +407,7 @@ function createTorus() {
     // Crear el cilindro en la posición del torus con los mismos parámetros
     const cylinderElement = document.createElement('a-cylinder');
     cylinderElement.setAttribute('position', '0 0.5 0'); // Mismo centro que el torus
-    cylinderElement.setAttribute('height', '3');  // Altura del cilindro
+    cylinderElement.setAttribute('height', '10');  // Altura del cilindro
     cylinderElement.setAttribute('radius', '1.1'); // Radio del cilindro
     cylinderElement.setAttribute('material', 'color: #b2ff00; emissive: green;'); // Color del cilindro
     cylinderElement.setAttribute('opacity', '0.15'); // Opacidad del cilindro
@@ -383,29 +594,40 @@ AFRAME.registerComponent('command-handler', {
         const components = ['cubo', 'esfera', 'plano', 'cilindro', 'luz'];
         const assets = ['contenedor', 'radio'];
         let currentCommand = null;
+        let isProcessing = false;  // Nueva variable para controlar el estado de procesamiento
 
         if (!inputElement) {
             console.error('No se ha especificado un elemento de entrada para command-handler');
             return;
         }
 
+        // Función para manejar el fin de un comando
+        const finishCommand = () => {
+            isProcessing = false;
+            currentCommand = null;
+            updateUserMessage('Comando completado', 'msg');
+            updateUserMessage('...', 'info');
+        };
+
+        // Escuchar eventos de finalización de comandos
+        scene.addEventListener('object-created', finishCommand);
+        scene.addEventListener('edit-completed', finishCommand);
+        scene.addEventListener('delete-completed', finishCommand);
+
         inputElement.addEventListener('transcription', (event) => {
             const transcript = event.detail.transcription.toLowerCase();
             console.log('Comando recibido Manejador:', transcript);
 
-            // Bloqueo si estamos modificando un objeto
-            if (modifyingBox || modifyingSphere|| modifyingPlane|| modifyingConteiner|| modifyingLight|| modifyingCylinder|| modifyingRadio) return;
-            // Si estamos en modo crear y ya dijimos "crear", permitimos avanzar
-            if (currentCommand && !['crear', 'assets'].includes(currentCommand)) {
-                // Si no es salir/atrás, ignorar nuevos comandos
-                if (!transcript.includes('salir') && !transcript.includes('atrás') && !transcript.includes('cambio')) {
-                    console.log(`Comando ignorado. Ya hay uno activo: ${currentCommand}`);
-                    return;
-                }
+            // Bloqueo si estamos modificando un objeto o procesando un comando
+            if (modifyingBox || modifyingSphere || modifyingPlane || modifyingConteiner || 
+                modifyingLight || modifyingCylinder || modifyingRadio || isProcessing) {
+                updateUserMessage('Espera a que termine el comando actual', 'msg');
+                return;
             }
 
-            // SALIR o ATRÁS — cancelar cualquier modo activo
-            if (transcript.includes('salir') || transcript.includes('atrás')|| transcript.includes('cambio')) {
+            // SALIR o ATRÁS — siempre permitido para cancelar cualquier modo
+            if (transcript.includes('salir') || transcript.includes('atrás') || transcript.includes('cambio')) {
+                isProcessing = false;
                 currentCommand = null;
                 updateUserMessage('Saliendo del modo actual.', 'msg');
                 updateUserMessage('...', 'info');
@@ -414,7 +636,8 @@ AFRAME.registerComponent('command-handler', {
             }
 
             // INICIO DE MODO CREAR
-            if (transcript.includes('crear') && currentCommand !== 'crear') {
+            if (transcript.includes('crear') && !currentCommand) {
+                isProcessing = true;
                 currentCommand = 'crear';
                 updateUserMessage('Dime qué objeto crear:', 'msg');
                 updateUserMessage('cubo\nesfera\nplano\ncilindro\nluz\nassets', 'info');
@@ -427,7 +650,6 @@ AFRAME.registerComponent('command-handler', {
                 const objectType = components.find((comp) => transcript.includes(comp));
                 updateUserMessage(`Creando un ${objectType}.`, 'msg');
                 scene.emit('start-object-creation', { type: objectType });
-                currentCommand = null; // Fin de creación
                 return;
             }
 
@@ -443,20 +665,23 @@ AFRAME.registerComponent('command-handler', {
                 const objectType = assets.find((asset) => transcript.includes(asset));
                 updateUserMessage(`Creando un ${objectType}.`, 'msg');
                 scene.emit('start-object-creation', { type: objectType });
-                currentCommand = null;
                 return;
             }
 
             // EDITAR
-            if (transcript.includes('editar')) {
+            if (transcript.includes('editar') && !currentCommand) {
+                isProcessing = true;
                 currentCommand = 'editar';
+                updateUserMessage('Modo edición activado', 'msg');
                 scene.emit('edit-mode');
                 return;
             }
 
             // ELIMINAR
-            if (transcript.includes('eliminar')) {
+            if (transcript.includes('eliminar') && !currentCommand) {
+                isProcessing = true;
                 currentCommand = 'eliminar';
+                updateUserMessage('Modo eliminación activado', 'msg');
                 scene.emit('delete-mode');
                 return;
             }
@@ -468,120 +693,47 @@ AFRAME.registerComponent('command-handler', {
                 scene.emit('help-mode');
                 return;
             }
-        });
-    }
-});
 
-AFRAME.registerComponent('delete-object', {
-    schema: {
-        input: { type: 'selector', default: null },
-    },
+            // GUARDAR ESCENA
+            if (transcript.includes('guardar') && !currentCommand) {
+                isProcessing = true;
+                updateUserMessage('Guardando la escena actual...', 'msg');
 
-    init: function () {
-        const inputElement = this.data.input;
-        const scene = document.querySelector('a-scene');
-        let entityToDel = null; // Objeto a editar
-
-        // Variables de estado FUERA del listener
-        let deleteConfirmed = false;
-        let deleteCancelled = false;
-        let step = null;
-
-        inputElement.addEventListener('transcription', (event) => {
-            let transcript = event.detail.transcription.trim().toLowerCase().replace(/\.$/, '');
-
-            if (!entityToDel) {
-                if (transcript.includes('eliminar')) {
-                    updateUserMessage('Por favor, dime el ID del objeto que quieres eliminar.', 'msg');
-                    step = 'idDel';
-                    return;
-                }
-                if (transcript.includes('crear') || transcript.includes('editar')) {
-                    updateUserMessage('No puedes editar ni crear mientras estás en modo de eliminar.', 'warn');
-                    return;
-                }
-                if (step === 'idDel') {
-                    const torusElement = createTorus();
-                    entityToDel = getEntityById(transcript);
-
-                    if (entityToDel) {
-                        entityToDel.appendChild(torusElement);
-                        updateUserMessage(`¿Estás seguro que quieres eliminar ${entityToDel.id}? (Sí / No)`, 'msg');
-                    } else if (transcript.includes('cambio')){
-                        updateUserMessage('Accion finalizando...', 'msg');
-                        // Mostrar otro mensaje después de 3 segundos
-                        setTimeout(function () {
-                            updateUserMessage("Reconocimiento de voz activado...",'msg');
-                        }, 3000);  // 3000ms = 3 segundos                        
-                    }else {
-                        updateUserMessage('No se encontró un objeto con ese ID. ¿Intentamos de nuevo?', 'msg');
-                        setTimeout(function () {
-                            updateUserMessage("Reconocimiento de voz activado...",'msg');
-                        }, 3000);  // 3000ms = 3 segundos   
-                    }
-
-                    step = null;
-                    return;
-                }
-            } else {
-                // Confirmación de eliminación
-                if (!deleteConfirmed && !deleteCancelled) {
-                    if (transcript.includes('sí')) {
-                        deleteConfirmed = true;
-                        updateUserMessage(`${entityToDel.id} eliminado`, 'msg');
-                        
-                        // Eliminar torus antes de borrar
-                        const torusToRemove = entityToDel.querySelector('#edit');
-                        if (torusToRemove) {
-                            entityToDel.removeChild(torusToRemove);
-                        }
-
-                        entityToDel.parentNode.removeChild(entityToDel);
-
-                        setTimeout(() => {
-                            updateUserMessage("Diga 'salir', 'atrás' o 'cambio' para volver", 'msg');
-                        }, 3000);
-                        return;
-                    } else if (transcript.includes('no')) {
-                        deleteCancelled = true;
-                        updateUserMessage("Eliminación cancelada. Diga 'salir', 'atrás' o 'cambio' para volver", 'msg');
-                        return;
-                    }
+                if (typeof saveScene === 'function') {
+                    saveScene();
+                    updateUserMessage('Escena guardada exitosamente.', 'info');
+                } else {
+                    updateUserMessage('Error: No se pudo guardar la escena.', 'info');
                 }
 
-                // Comandos para salir del modo
-                const exitWords = ['salir', 'atrás', 'cambio'];
-                if (exitWords.some(word => transcript.includes(word))) {
-                    // Eliminar torus si queda
-                    if (entityToDel) {
-                        const torusToRemove = entityToDel.querySelector('#edit');
-                        if (torusToRemove) {
-                            entityToDel.removeChild(torusToRemove);
-                        }
-                        updateUserMessage(`Finalizando eliminación de ${entityToDel.id}`, 'msg');
-                    }
+                finishCommand();
+                return;
+            }
 
-                    entityToDel = null;
-                    deleteConfirmed = false;
-                    deleteCancelled = false;
-                    step = null;
-
-                    scene.emit('exit-create-mode');
-
-                    setTimeout(() => {
-                        updateUserMessage("Reconocimiento de voz activado...", 'msg');
-                    }, 3000);
+            // CARGAR ESCENA
+            if ((transcript.includes('cargar escena') || transcript.includes('cargar')) && !currentCommand) {
+                isProcessing = true;
+                updateUserMessage('Cargando la escena...', 'msg');
+                
+                if (typeof loadSceneFromStorage === 'function') {
+                    loadSceneFromStorage();
+                    updateUserMessage('Escena cargada exitosamente.', 'info');
+                } else {
+                    updateUserMessage('Error: No se pudo cargar la escena.', 'info');
                 }
+
+                finishCommand();
+                return;
             }
         });
-
-    },
+    }
 });
 
 // Componente para crear objetos
 AFRAME.registerComponent('object-creator', {
     init: function () {
         const scene = document.querySelector('a-scene');
+        const objsCreated = document.querySelector('#objsCreated');
         let currentObject = null; // Para almacenar referencia al objeto creado
         function createText(entity){
             const text = document.createElement('a-text');
@@ -650,7 +802,7 @@ AFRAME.registerComponent('object-creator', {
 
                 text = createText(cubeData)
                 entity.appendChild(text);
-                scene.appendChild(entity);
+                objsCreated.appendChild(entity);
                 
                 console.log('Datos del cubo:', JSON.stringify(cubeData, null, 2));
                 
@@ -683,7 +835,7 @@ AFRAME.registerComponent('object-creator', {
                 
                 text = createText(sphereData)
                 entity.appendChild(text);
-                scene.appendChild(entity);
+                objsCreated.appendChild(entity);
                 
                 console.log('Datos de la esfera:', JSON.stringify(sphereData, null, 2));
                 
@@ -719,7 +871,7 @@ AFRAME.registerComponent('object-creator', {
 
                 text = createText(planeData)
                 entity.appendChild(text);
-                scene.appendChild(entity);
+                objsCreated.appendChild(entity);
                 
                 console.log('Datos del plano:', JSON.stringify(planeData, null, 2));
                 
@@ -775,7 +927,7 @@ AFRAME.registerComponent('object-creator', {
                 text = createText(lightData)
                 entity.appendChild(text);
                 entity.appendChild(lightEntity);
-                scene.appendChild(entity);
+                objsCreated.appendChild(entity);
                 
                 
                 console.log('Datos de la luz:', JSON.stringify(lightData, null, 2));
@@ -787,7 +939,7 @@ AFRAME.registerComponent('object-creator', {
                 currentObject = entity;
             }else if(objectType === 'contenedor'){
                 const assetData = {
-                    id: 'contenedor',
+                    id: 'conte',
                     gltfModel: '#contenedor',
                     position: { x: -4, y: 1, z: -3 },
                     geometry: {height:1},
@@ -809,7 +961,7 @@ AFRAME.registerComponent('object-creator', {
                 text.setAttribute('scale','40 40 40')
                 text.setAttribute('position','0 86 0')
                 entity.appendChild(text);
-                scene.appendChild(entity);
+                objsCreated.appendChild(entity);
                 
                 console.log('Datos del asset:', JSON.stringify(assetData, null, 2));
                 
@@ -901,7 +1053,7 @@ AFRAME.registerComponent('dynamic-modifier', {
                         updateUserMessage('...', 'info');
                         scene.emit('exit-create-mode');
                                         // Mostrar otro mensaje después de 3 segundos
-                        setTimeout(function() {
+                        setTimeout(function () {
                             updateUserMessage("Reconociemiento de voz activado ...",'msg');
                         }, 3000);  // 3000ms = 3 segundos
                     } else {
@@ -1034,7 +1186,7 @@ AFRAME.registerComponent('edit-mode-handler', {
                             // Mostrar otro mensaje después de 3 segundos
                             setTimeout(function () {
                                 updateUserMessage("Reconocimiento de voz activado...",'msg');
-                            }, 3000);  // 3000ms = 3 segundos
+                            }, 3000);
                         } else {
                             step = keywordActions[keyword].step;
                             updateUserMessage(keywordActions[keyword].message,'msg');
@@ -1096,5 +1248,176 @@ AFRAME.registerComponent('sky-manager', {
             el.setAttribute('material', 'color: rgb(196, 196, 196)'); // Color neutro
             console.log('color de fondo restaurado.');
         }
+    }
+});
+
+// Componente para GUARDAR ESCENAS
+AFRAME.registerComponent('scene-saver', {
+    saveScene: function () {
+        const scene = document.querySelector('a-scene');
+        const objsCreated = document.querySelector('#objsCreated');
+
+        if (!scene || !objsCreated) {
+            console.error("No se ha encontrado la escena o el contenedor objsCreated.");
+            return;
+        }
+
+        let savedScene = [];
+
+        // Guardar todos los objetos dentro de objsCreated
+        [...objsCreated.children].forEach(el => {
+            let data = {
+                tag: el.tagName.toLowerCase(),
+                id: el.id || null,
+                class: el.className || null,
+                components: {},
+                children: []  // Guardar los hijos de la entidad
+            };
+
+            // Guardar componentes importantes
+            ['position', 'rotation', 'scale', 'geometry', 'material', 'light','gltf-model'].forEach(comp => {
+                if (el.hasAttribute(comp)) {
+                    data.components[comp] = AFRAME.utils.clone(el.getAttribute(comp));
+                }
+            });
+
+            // Guardar los hijos de este elemento (si los tiene)
+            [...el.children].forEach(child => {
+                let childData = {
+                    tag: child.tagName.toLowerCase(),
+                    id: child.id || null,
+                    class: child.className || null,
+                    components: {}
+                };
+
+                // Guardar los componentes del hijo (incluyendo <a-text> si es el caso)
+                ['position', 'rotation', 'scale', 'geometry', 'material', 'light','gltf-model'].forEach(comp => {
+                    if (child.hasAttribute(comp)) {
+                        childData.components[comp] = AFRAME.utils.clone(child.getAttribute(comp));
+                    }
+                });
+
+                // Si el hijo es un <a-text>, guardar sus atributos específicos
+                if (child.tagName.toLowerCase() === 'a-text') {
+                    ['value','align','position', 'scale', 'color','width','look-at'].forEach(comp => {
+                        if (child.hasAttribute(comp)) {
+                            childData.components[comp] = AFRAME.utils.clone(child.getAttribute(comp));
+                        }
+                    });
+                }
+                data.children.push(childData);  // Guardar el hijo
+            });
+
+            savedScene.push(data);  // Agregar este elemento con sus hijos a la escena guardada
+        });
+
+        // Guardar en localStorage o enviarlo al backend
+        const sceneJSON = JSON.stringify(savedScene, null, 2);
+        console.log('Escena guardada:', sceneJSON);
+        localStorage.setItem('savedScene', sceneJSON);
+    },
+
+    init: function () {
+        // Ejecutar con un botón o llamada externa
+        window.saveScene = this.saveScene.bind(this); // Puedes llamar saveScene() desde la consola
+    }
+});
+
+
+
+// Componente para CARGAR ESCENAS
+AFRAME.registerComponent('scene-loader', {
+    init: function () {
+        const scene = document.querySelector('a-scene');  // Asegúrate de que la escena existe
+
+        if (!scene) {
+            console.error("La escena no se ha encontrado.");
+            return;
+        }
+
+        // Verificar si ya existe el contenedor objsCreated en la escena
+        let objsCreated = document.querySelector('#objsCreated');
+
+        // Si no existe, crearlo dinámicamente y agregarlo a la escena
+        if (!objsCreated) {
+            objsCreated = document.createElement('a-entity');
+            objsCreated.setAttribute('id', 'objsCreated');
+            scene.appendChild(objsCreated);  // Añadir a la escena
+        }
+
+        // Función para cargar la escena desde un JSON
+        this.loadScene = function (jsonData) {
+            if (!jsonData || jsonData.length === 0) {
+                console.error("No se encontró ningún dato para cargar la escena.");
+                return;
+            }
+
+            console.log("Datos de la escena: ", jsonData);
+
+            // Limpiar solo los elementos dentro de #objsCreated
+            const objsCreated = document.querySelector('#objsCreated');
+            if (objsCreated) {
+                // Limpiar los hijos dentro de #objsCreated
+                [...objsCreated.children].forEach(child => {
+                    objsCreated.removeChild(child);
+                });
+            }
+
+            // Recorrer todos los objetos en el JSON y agregar los elementos dentro de "objsCreated"
+            jsonData.forEach(obj => {
+                const el = document.createElement(obj.tag);  // Crear el elemento A-Frame dinámicamente
+
+                // Asegurarse de que los datos de atributos no estén vacíos
+                if (obj.id) el.setAttribute('id', obj.id);
+                if (obj.class) el.setAttribute('class', obj.class);
+
+                // Agregar los componentes
+                if (obj.components) {
+                    for (let comp in obj.components) {
+                        if (obj.components[comp]) {
+                            el.setAttribute(comp, obj.components[comp]);
+                        }
+                    }
+                }
+
+                // Recargar los hijos (si existen) dentro de la entidad
+                if (obj.children) {
+                    obj.children.forEach(childData => {
+                        const child = document.createElement(childData.tag);
+
+                        if (childData.id) child.setAttribute('id', childData.id);
+                        if (childData.class) child.setAttribute('class', childData.class);
+
+                        // Agregar los componentes de los hijos
+                        for (let comp in childData.components) {
+                            if (childData.components[comp]) {
+                                child.setAttribute(comp, childData.components[comp]);
+                            }
+                        }
+
+                        el.appendChild(child);  // Agregar el hijo a su elemento padre
+                    });
+                }
+
+                // Agregar el elemento dentro de "objsCreated"
+                objsCreated.appendChild(el);
+            });
+
+            console.log('Escena cargada desde JSON.');
+        };
+
+        // Función para cargar la escena desde localStorage
+        window.loadSceneFromStorage = () => {
+            const saved = localStorage.getItem('savedScene');
+            if (saved) {
+                const json = JSON.parse(saved);
+
+                console.log("Cargando escena desde localStorage:", json);
+
+                this.loadScene(json);  // Llamar a la función para cargar la escena
+            } else {
+                console.warn('No se encontró ninguna escena guardada en localStorage.');
+            }
+        };
     }
 });
