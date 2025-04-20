@@ -91,6 +91,10 @@ AFRAME.registerComponent('scene-creator', {
 
         // ------------------------
         // Panel de Información
+
+        //CONVERTIR A ESTO EN UN COMPONENTE 
+        // QUE SEA INDEPENDIENTE
+        // a-entyty panelInfo
         // ------------------------
         const infoPanel = document.createElement('a-plane');
         infoPanel.setAttribute('position', '25 15 -45');
@@ -130,7 +134,7 @@ AFRAME.registerComponent('scene-creator', {
         // ------------------------
         // Cursor,InputBox y controladores VR
         // ------------------------
-        // Crear el cuadro de entrada de voz
+        // LA CAMARA FUERA Y EL COMPONENTE INTERIOR DENTRO.
         // Crear el cuadro de entrada de voz
         const voiceInputBox = document.createElement('a-box');
         voiceInputBox.setAttribute('id', 'voiceInputBox');
@@ -151,7 +155,7 @@ AFRAME.registerComponent('scene-creator', {
         voiceText.setAttribute('color', 'black');
         voiceText.setAttribute('width', '3');
         voiceInputBox.appendChild(voiceText);
-
+        
         // Crear el jugador con controles de movimiento
         const player = document.createElement('a-entity');
         player.setAttribute('id', 'player');
@@ -199,6 +203,10 @@ AFRAME.registerComponent('scene-creator', {
 
 // ------------------------- FUNCIONES -------------------------------
 
+// COMPONENTE DE FUNCIONES 
+// 
+// CUANDO UN COMPONENTE QUIERA ACTUALIZAR LLAMAMOS A LA FUNCION DEL COMPONENTE.
+
 // Función para actualizar el mensaje del usuario
 function updateUserMessage(message,mode) {
     const messageElement = document.querySelector('#userMessage');
@@ -209,6 +217,8 @@ function updateUserMessage(message,mode) {
         messageElementType2.setAttribute('value', message);
     }
 }
+
+//
 // Captura de posición
 function stepsPOS(posKey, entity, transcript) {
     const match = transcript.match(/-?\d+(\.\d+)?/);
@@ -389,7 +399,6 @@ function getLastCreatedEntity() {
     
     return null;  // Si no hay entidades, retorna null
 }
-
 
 // Función para crear el torus y elementos asociados
 function createTorus() {

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reconocimiento de Voz VR con A-Frame</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <h1>Reconocimiento de voz en VR</h1>
+    <p>Habla para ver la transcripción en la escena VR.</p>
+
+    <script>
+      // Verificar si la API SpeechRecognition está disponible
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';  // Configura el idioma a español
+        recognition.interimResults = true;  // Muestra resultados parciales
+        recognition.maxAlternatives = 1;  // Limita las alternativas a 1
+
+        // Iniciar el reconocimiento de voz
+        recognition.start();
+
+        // Cuando se obtiene un resultado
+        recognition.onresult = function(event) {
+          const transcript = event.results[0][0].transcript; // Texto reconocido
+          console.log('Texto reconocido:', transcript);
+          
+          // Mostrar el texto en el elemento a-text en la escena VR
+          const aText = document.querySelector('#texto-recibido');
+          aText.setAttribute('value', transcript);
+        };
+
+        // Si ocurre un error
+        recognition.onerror = function(event) {
+          console.error('Error en el reconocimiento de voz:', event.error);
+        };
+
+        // Cuando el reconocimiento termina
+        recognition.onend = function() {
+          recognition.start();  // Reiniciar el reconocimiento si termina
+        };
+      } else {
+        alert("La API de reconocimiento de voz no es soportada en este navegador.");
+      }
+    </script>
+
+    <!-- Escena A-Frame -->
+    <a-scene>
+      <!-- Objeto en VR (Cubo) -->
+      <a-box position="0 1.5 -3" color="#4CC3D9"></a-box>
+      <a-sky color="#ECECEC"></a-sky>
+
+      <!-- Texto para mostrar la transcripción del habla -->
+      <a-text id="texto-recibido" position="0 3 -5" value="Di algo..." color="#000" width="6"></a-text>
+    </a-scene>
+  </body>
+</html>

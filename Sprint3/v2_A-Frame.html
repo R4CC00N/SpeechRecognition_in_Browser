@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('input-text', {
+        init: function () {
+          var el = this.el;
+          var sky = document.querySelector('a-sky');
+          var planeText = document.querySelector('#planeText');
+          var recognition;
+          var isRecording = false;
+
+          if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'es-ES';
+          } else {
+            console.error('API de reconocimiento de voz no soportada en este navegador');
+          }
+
+          el.addEventListener('click', () => {
+            if (!isRecording) {
+              if (recognition) {
+                recognition.start();
+                isRecording = true;
+                planeText.setAttribute('value', 'Escuchando...');
+              }
+            } else {
+              if (recognition) {
+                recognition.stop();
+                isRecording = false;
+                planeText.setAttribute('value', 'Grabacion detenida');
+              }
+            }
+          });
+
+          if (recognition) {
+            recognition.onresult = (event) => {
+              let transcript = '';
+              for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+              }
+              planeText.setAttribute('value', transcript);
+
+             // Detectar las palabras "crear" o "editar" y cambiar el color de fondo de a-sky
+             if (transcript.toLowerCase().includes('crear')) {
+                sky.setAttribute('color', '#98bf63'); // Cambiar fondo a verde
+                // añadir funcionalidad por casos
+                // leer linea y si dentro tambien aparece un array de [cubo, circulo, ....]
+                // los crea en 
+                // solicitar donde y que tamaño y un nombre
+              } else if (transcript.toLowerCase().includes('editar')) {
+                sky.setAttribute('color', '#d13f3f'); // Cambiar fondo a rojo
+                // debe decir el que por un id y luego decir que quier modificar si detecta  [tamaño, escala, posicion]
+                //hacer lo solicidtado
+              } else {
+                sky.setAttribute('color', '#D3D3D3'); // Fondo gris claro por defecto
+              }
+            };
+
+            recognition.onerror = (event) => {
+              console.error('Error en el reconocimiento de voz:', event.error);
+              planeText.setAttribute('value', 'Error al escuchar');
+            };
+          }
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene>
+      <a-sky color="#D3D3D3"></a-sky>
+
+      <a-box position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text>
+        <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
+      </a-box>
+
+      <a-plane position="0 0.5 -5" width="6" height="2" color="white">
+        <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+      </a-plane>
+
+      <a-entity cursor="rayOrigin: mouse" position="0 0 -3"></a-entity>
+    </a-scene>
+  </body>
+</html>

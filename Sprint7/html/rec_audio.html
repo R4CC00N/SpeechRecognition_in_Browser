@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Grabación en Oculus Quest 3</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity position="0 1.6 -2">
+        <a-box id="startButton" color="red" depth="0.1" height="0.5" width="1"></a-box>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      let mediaRecorder;
+      let startTime;
+
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+
+          mediaRecorder.onstart = () => {
+            startTime = Date.now();
+          };
+
+          mediaRecorder.onstop = () => {
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            alert(`Grabación finalizada. Duración: ${elapsedTime.toFixed(2)} segundos.`);
+          };
+
+          mediaRecorder.start();
+          setTimeout(() => mediaRecorder.stop(), 5000); // Graba por 5 segundos
+        } catch (error) {
+          alert("Error al acceder al micrófono: " + error.message);
+        }
+      }
+
+      document.querySelector("#startButton").addEventListener("click", startRecording);
+    </script>
+  </body>
+</html>

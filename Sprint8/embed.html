@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <script src="https://supereggbert.github.io/aframe-htmlembed-component/dist/build.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+    body{
+      font-family: 'Roboto', sans-serif;
+      text-shadow: 0px 0px 10px #00d2ff;
+      color: #fff;
+      font-size: 32px;
+    }
+    h1{
+      font-size: 52px;
+    }
+    .dark{
+      background-color: rgba(0,0,0,0.2);
+      border-radius:50px;  
+      background-repeat: no-repeat;
+      background-position: bottom right;
+      padding: 40px;
+    }
+    .main{
+      width: 1024px;
+      height: 768px;
+      overflow: hidden;
+    }
+    .menu{
+      width: 256px;
+      height: 768px;
+      text-align: center;
+    }
+    .menu ul{
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    a.button{
+      display: inline-block;
+      width: 100%;
+      border-radius: 20px;
+      background-color: #000;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+    }
+    a.button:hover{
+      background-color: #fff;
+      color: #888;
+    }
+    a.button:active{
+      background-color: #fff;
+      color: #888;
+      box-shadow: 0px 0px 50px #00d2ff;
+    }
+    .code{
+      white-space: pre;
+      font-size: 0.7em;
+      background-color: #000;
+      margin-bottom: 30px;
+    }
+    .next,.prev,.close{
+      position: absolute;
+      bottom: 0px;
+      right: 30px;
+      display: inline-block;
+      width: auto !important;
+      padding: 20px 30px !important;
+    }
+    .prev{
+      right: auto;
+      left: 30px;
+    }
+    #page1{
+      position: relative;
+      height: 100%;
+    }
+    #page2, #page3, #page4,#page5,#page6,#page7,#page8{
+      display: none;
+      position: relative;
+      height: 100%;
+    }
+    .slide{
+      height:100%;
+    }
+    .slide:target #page1{
+      display: none;
+    }
+    #slide2:target #page2{
+      display: block;
+    }
+    #slide3:target #page3{
+      display: block;
+    }
+    #slide4:target #page4{
+      display: block;
+    }
+    #slide5:target #page5{
+      display: block;
+    }
+    #slide6:target #page6{
+      display: block;
+    }
+    #slide7:target #page7{
+      display: block;
+    }
+    #slide8:target #page8{
+      display: block;
+    }
+    #page4 ul{
+      list-style-type: square;
+      font-size: 0.8em;
+    }
+    img {
+        width: 200px;
+        display: block; /* Convierte la imagen en un elemento de bloque */
+        margin-left: 40%;
+    }
+    </style>
+  </head>
+  <body>
+    <script>
+        function closeSlides() {
+            document.getElementById("main").setAttribute("visible", "false"); // Oculta el panel
+        }
+      </script>
+    <div id="slide2" class="slide">
+    <div id="slide3" class="slide">
+    <div id="slide4" class="slide">
+    <div id="slide5" class="slide">
+    <div id="slide6" class="slide">
+    <div id="slide7" class="slide">
+    <div id="slide8" class="slide">
+    <a-scene>
+      <a-assets>
+        <img id="floor" src="assets/floor.png">
+        <img id="tex1" src="assets/box.png">
+      </a-assets>
+      <a-plane material="src:#floor; repeat: 700 700; transparent: true;" height="500" width="500" rotation="-90 0 0"></a-plane>
+      <a-sky color="#222222"></a-sky>
+      <a-entity id="cameraRig">
+        <a-camera id="camera">
+        </a-camera>
+        <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: .screen"></a-entity>
+        <a-entity laser-controls raycaster="objects: .screen;"></a-entity>
+      </a-entity>
+      <a-entity id="main" class="screen dark main" htmlembed="ppu:256" position="0 2.5 -5">
+        <div id="page1">
+          <h1>FUNCIONALIDAD</h1>
+          <p>
+            PRESIONA EL BOTON 'ESCUCHAR' PARA PODER USAR LA APLICACION PRESIONA EL BOTON 'ESCUCHAR' PARA PODER USAR LA APLICACION PRESIONA EL BOTON 'ESCUCHAR' PARA PODER USAR LA APLICACION PRESIONA EL BOTON 'ESCUCHAR' PARA PODER USAR LA APLICACION PRESIONA EL BOTON 'ESCUCHAR' PARA PODER USAR LA APLICACION 
+          </p>
+          <img src="img/1.png" alt="imagen1">
+          <a href="#slide2" class="button next">Next Page</a>
+        </div>
+        <div id="page2">
+          <h1>COMANDOS</h1>
+          <p> Los siguientes comandos son estos.
+          <div class="code">
+            * CREAR
+            * EDITAR
+            * ELIMINAR
+            * GUARDAR
+            * CARGAR
+            * AYUDA
+          </div>
+          <a href="#" class="button prev">Prev Page</a>
+          <a href="#slide3" class="button next">Next Page</a>
+        </div>
+        <div id="page3">
+          <h1>CREAR</h1>
+          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+          <a href="#slide2" class="button prev">Prev Page</a>
+          <a href="#slide4" class="button next">Next Page</a>
+        </div>
+        <div id="page4">
+            <h1>EDITAR</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+            <a href="#slide3" class="button prev">Prev Page</a>
+            <a href="#slide5" class="button next">Next Page</a>
+        </div>
+        <div id="page5">
+            <h1>ELIMINAR</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+            <a href="#slide4" class="button prev">Prev Page</a>
+            <a href="#slide6" class="button next">Next Page</a>
+        </div>
+        <div id="page6">
+            <h1>GUARDAR</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+            <a href="#slide5" class="button prev">Prev Page</a>
+            <a href="#slide7" class="button next">Next Page</a>
+        </div>
+        <div id="page7">
+            <h1>CARGAR</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+            <a href="#slide6" class="button prev">Prev Page</a>
+            <a href="#slide8" class="button next">Next Page</a>
+        </div>
+        <div id="page8">
+            <h1>GRACIAS</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime amet, aliquid quae nam veritatis aut ducimus reprehenderit repellendus tempora magni qui? Obcaecati totam provident facilis corporis repudiandae fugit voluptate magni!</p>
+            <a href="#slide7" class="button prev">Prev Page</a>
+            <a href="#" class="button close" onclick="closeSlides()">Close</a>
+        </div>
+
+      </a-entity>
+      
+    </a-scene>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+  </body>
+</html>

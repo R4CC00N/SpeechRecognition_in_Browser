@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script>
+        // Componente de reconocimiento de voz
+        AFRAME.registerComponent('input-text', {
+            init: function () {
+                var el = this.el;
+                var planeText = document.querySelector('#planeText');
+                var scene = document.querySelector('a-scene');
+                var recognition;
+                var isRecording = false;
+                const components = ['cubo', 'esfera', 'plano', 'cilindro'];
+                
+                // Verificar compatibilidad con la API de reconocimiento de voz
+                if ('webkitSpeechRecognition' in window) {
+                    recognition = new webkitSpeechRecognition();
+                    recognition.continuous = true;
+                    recognition.interimResults = false;
+                    recognition.lang = 'es-ES';
+                } else {
+                    console.error('API de reconocimiento de voz no soportada en este navegador');
+                }
+                
+                let currentCommand = null;
+
+                // Función para convertir texto a números
+                function convertirTextoANumero(texto) {
+                    const mapaNumeros = {
+                        'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
+                        'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
+                    };
+                    texto = texto.toLowerCase();
+                    return texto.replace(/\b(menos\s)?(\w+)\b/g, (match, menos, palabra) => {
+                        const numero = mapaNumeros[palabra] !== undefined ? mapaNumeros[palabra] : isNaN(Number(palabra)) ? match : Number(palabra);
+                        return menos ? -numero : numero;
+                    });
+                }
+
+                // Iniciar/Detener grabación al hacer clic
+                el.addEventListener('click', () => {
+                    if (!isRecording) {
+                        if (recognition) {
+                            recognition.start();
+                            isRecording = true;
+                            planeText.setAttribute('value', 'Escuchando...');
+                        }
+                    } else {
+                        if (recognition) {
+                            recognition.stop();
+                            isRecording = false;
+                            planeText.setAttribute('value', 'Grabación detenida');
+                        }
+                    }
+                });
+
+                // Cuando se recibe un resultado de la transcripción
+                if (recognition) {
+                    recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            transcript += event.results[i][0].transcript;
+                        }
+
+                        // Convertir los números en el texto
+                        transcript = convertirTextoANumero(transcript);
+
+                        // Mostrar transcripción procesada en la consola
+                        console.log('Transcripción procesada:', transcript);
+
+                        // Pasar la transcripción al siguiente componente
+                        el.emit('transcription', { transcription: transcript });
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error('Error en el reconocimiento de voz:', event.error);
+                        planeText.setAttribute('value', 'Error al escuchar');
+                    };
+                }
+            }
+        });
+
+        // Componente de manejo de comandos
+        AFRAME.registerComponent('command-handler', {
+            init: function () {
+                var el = this.el;
+                var planeText = document.querySelector('#planeText');
+                var scene = document.querySelector('a-scene');
+                var components = ['cubo', 'esfera', 'plano', 'cilindro'];
+                var currentCommand = null;
+
+                // Escuchar la transcripción
+                el.addEventListener('transcription', (event) => {
+                    var transcript = event.detail.transcription.toLowerCase();
+
+                    // Mostrar la transcripción
+                    console.log('Comando recibido:', transcript);
+                    planeText.setAttribute('value', transcript);
+
+                    // Manejar los comandos
+                    if (transcript.includes('crear')) {
+                        currentCommand = 'crear';
+                        planeText.setAttribute('value', 'Dime qué objeto crear (cubo, esfera, plano, cilindro)');
+                    } else if (currentCommand === 'crear' && components.some((comp) => transcript.includes(comp))) {
+                        const objectType = components.find((comp) => transcript.includes(comp));
+                        planeText.setAttribute('value', `Creando un ${objectType}. Ahora dime la posición x.`);
+                        currentCommand = { type: 'crear', object: objectType, position: { x: null, y: null, z: null }, size: null, step: 'x' };
+                    } else if (currentCommand && currentCommand.step === 'x' && transcript.includes('x')) {
+                        const xMatch = transcript.match(/(-?\d+)/);
+                        if (xMatch) {
+                            currentCommand.position.x = Number(xMatch[0]);
+                            planeText.setAttribute('value', `Posición x: ${currentCommand.position.x}. Ahora dime la posición y.`);
+                            currentCommand.step = 'y';
+                        }
+                    } else if (currentCommand && currentCommand.step === 'y' && transcript.includes('y')) {
+                        const yMatch = transcript.match(/(-?\d+)/);
+                        if (yMatch) {
+                            currentCommand.position.y = Number(yMatch[0]);
+                            planeText.setAttribute('value', `Posición y: ${currentCommand.position.y}. Ahora dime la posición z.`);
+                            currentCommand.step = 'z';
+                        }
+                    } else if (currentCommand && currentCommand.step === 'z' && transcript.includes('z')) {
+                        const zMatch = transcript.match(/(-?\d+)/);
+                        if (zMatch) {
+                            currentCommand.position.z = Number(zMatch[0]);
+                            planeText.setAttribute('value', 'Dime el tamaño');
+                            currentCommand.step = 'size';
+                        }
+                    } else if (currentCommand && currentCommand.step === 'size' && transcript.includes('tamaño')) {
+                        const sizeMatch = transcript.match(/(-?\d+)/);
+                        if (sizeMatch) {
+                            currentCommand.size = Number(sizeMatch[0]);
+                            planeText.setAttribute(
+                                'value',
+                                `Creando ${currentCommand.object} en posición (${currentCommand.position.x}, ${currentCommand.position.y}, ${currentCommand.position.z}) con tamaño ${currentCommand.size}.`
+                            );
+
+                            const entity = document.createElement('a-entity');
+                            if (currentCommand.object === 'cubo') {
+                                entity.setAttribute('geometry', `primitive: box; height: ${currentCommand.size}; width: ${currentCommand.size}; depth: ${currentCommand.size}`);
+                            } else if (currentCommand.object === 'esfera') {
+                                entity.setAttribute('geometry', `primitive: sphere; radius: ${currentCommand.size / 2}`);
+                            } else if (currentCommand.object === 'plano') {
+                                entity.setAttribute('geometry', `primitive: plane; height: ${currentCommand.size}; width: ${currentCommand.size}`);
+                            } else if (currentCommand.object === 'cilindro') {
+                                entity.setAttribute('geometry', `primitive: cylinder; radius: ${currentCommand.size / 2}; height: ${currentCommand.size}`);
+                            }
+                            entity.setAttribute('position', `${currentCommand.position.x} ${currentCommand.position.y} ${currentCommand.position.z}`);
+                            entity.setAttribute('material', 'color: #FFC65D');
+                            scene.appendChild(entity);
+
+                            currentCommand = null;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <a-scene>
+        <a-sky color="#D3D3D3"></a-sky>
+
+        <a-box position="0 0.20 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0" input-text command-handler>
+            <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
+        </a-box>
+
+        <a-plane position="0 0.5 -5" width="6" height="2" color="white">
+            <a-text id="planeText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-entity cursor="rayOrigin: mouse" position="0 0 -3"></a-entity>
+    </a-scene>
+</body>
+</html>

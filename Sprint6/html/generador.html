@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>A-Frame VR Scene</title>
+    <!--
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.min.js"></script>
+
+    <script src="../js/generador.js"></script> <!-- Archivo JavaScript externo -->
+</head>
+<body>
+    <a-scene id="main" xr-mode-ui="enabled: false">
+        <!-- Cielo de fondo -->
+        <a-sky  color="#D3D3D3" sky-manager></a-sky>
+        <!-- Elemento de entrada interactivo con input-text -->
+        <a-box id="voiceInputBox" position="0 -0.5 -3" depth="0.15" height="0.25" width="2" color="#8ec3d0"
+            input-text="event: click">
+            <a-text value="Pulsa para grabar/detener" align="center" position="0 0.1 0.3" color="black" width="3"></a-text>
+        </a-box>
+
+        <!-- Plano de texto para mostrar la transcripción en 3D -->
+        <a-plane position="0 0.5 -3" width="6" height="2" color="white" transcription-display="input: #voiceInputBox">
+            <a-text id="transcriptionText" value="Texto en 3D" align="center" color="black" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <!-- Mensaje de estado para mostrar mensajes como el inicio/detención de grabación y transcripción -->
+        <a-text id="userMessage" value="Bienvenido a VOICE VR" align="center" color="black" position="0 2 -3" width="6"></a-text>
+
+        <!-- Cursor y controladores VR -->
+        <a-entity movement-controls="fly: false" position="0 0 -1">
+            <a-entity camera position="0 1 10" look-controls wasd-controls></a-entity>
+            <a-entity cursor="rayOrigin:mouse"></a-entity>
+            <a-entity laser-controls="hand: right"></a-entity>
+          </a-entity>
+
+        <!-- Componente de manejo de comandos que escucha al elemento con ID "voiceInputBox" -->
+        <a-entity id="create" command-handler="input: #voiceInputBox"></a-entity>
+        <a-entity object-creator="input: #create"></a-entity>
+    </a-scene>
+</body>
+</html>
