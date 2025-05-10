@@ -1,0 +1,154 @@
+body{
+  font-family: 'Roboto', sans-serif;
+  text-shadow: 0px 0px 10px #000000;
+  color: #ffffff;
+  font-size: 32px;
+}
+h1{
+  font-size: 52px;
+}
+.dark{
+  background-color: rgba(0, 0, 0, 0.336);
+  border-radius:50px;  
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  padding: 40px;
+}
+.main{
+  width: 1024px;
+  height: 768px;
+  overflow: hidden;
+}
+.menu{
+  width: 256px;
+  height: 768px;
+  text-align: center;
+}
+.menu ul{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+a.button{
+  display: inline-block;
+  width: 100%;
+  border-radius: 20px;
+  background-color: #000;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+a.button:hover{
+  background-color: #fff;
+  color: #888;
+}
+a.button:active{
+  background-color: #fff;
+  color: #888;
+  box-shadow: 0px 0px 50px #00d2ff;
+}
+.code{
+  white-space: pre;
+  font-size: 1.2em;
+  background-color: #000;
+  margin-bottom: 30px;
+}
+.next,.prev,.close{
+  position: absolute;
+  bottom: 0px;
+  right: 30px;
+  display: inline-block;
+  width: auto !important;
+  padding: 20px 30px !important;
+}
+.prev{
+  right: auto;
+  left: 30px;
+}
+#page1{
+  position: relative;
+  height: 100%;
+}
+#page2, #page3, #page4,#page5,#page6,#page7,#page8{
+  display: none;
+  position: relative;
+  height: 100%;
+}
+.slide{
+  height:100%;
+}
+.slide:target #page1{
+  display: none;
+}
+#slide2:target #page2{
+  display: block;
+}
+#slide3:target #page3{
+  display: block;
+}
+#slide4:target #page4{
+  display: block;
+}
+#slide5:target #page5{
+  display: block;
+}
+#slide6:target #page6{
+  display: block;
+}
+#slide7:target #page7{
+  display: block;
+}
+#slide8:target #page8{
+  display: block;
+}
+#page4 ul{
+  list-style-type: square;
+  font-size: 0.8em;
+}
+img {
+    width: 300px;
+    display: block; /* Convierte la imagen en un elemento de bloque */
+    margin-left: 30%;
+}
+#editar{
+    width: 600px;
+    display: block; /* Convierte la imagen en un elemento de bloque */
+    margin-left: 20%;
+}
+.panel {
+    width: 100%; /* El panel se expande al ancho de infoInner */
+    height: 100%; /* El panel se expande a la altura de infoInner */
+    background-color: #2e2e2e;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Alinea los items al inicio */
+    align-items: stretch; /* Estira los items horizontalmente */
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border-radius: 10px;
+    overflow: auto; /* Añade scroll si el contenido se desborda */
+}
+#texto{
+    font-size: 15px;
+    text-align: center;
+    margin-bottom: 0.5rem; /* Añade margen debajo del título */
+}
+.comando {
+    background-color: #444;
+    color: #fff;
+    display: flex; /* Convierte el comando en un contenedor Flexbox */
+    justify-content: center; /* Centra el texto horizontalmente */
+    align-items: center; /* Centra el texto verticalmente */
+    font-family: sans-serif;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.5rem;
+    margin: 0.2rem 0;
+    border-radius: 6px;
+    word-wrap: break-word;
+    white-space: normal;
+    overflow: visible;
+    flex: 0 0 auto; /* No permite que los items crezcan, pero respeta el tamaño del contenido */
+}
