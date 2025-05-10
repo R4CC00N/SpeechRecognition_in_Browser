@@ -67,6 +67,8 @@ AFRAME.registerComponent('player-move', {
     }
 });
 
+
+
 // Componente del panel con informacion de comandos
 AFRAME.registerComponent('info-panel', {
     init: function () {
@@ -1621,8 +1623,7 @@ AFRAME.registerComponent('scene-creator', {
         // ------------------------
         const customComponents = [
             { name: 'info-panel' },
-            { name: 'text-message' },
-            { name: 'player-move' }
+            { name: 'text-message' }
         ];
 
         customComponents.forEach(({ name }) => {
