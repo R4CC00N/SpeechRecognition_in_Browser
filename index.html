@@ -1,11 +1,143 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css">
+    <title>Creación y edición de objetos mediante comandos de voz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
-    <h1>HOLA MUNDO</h1>
+    <header>
+        <h1>Edición de Escenas 3D mediante Voz</h1>
+    </header>
+
+    <nav>
+        <a href="#descripcion">Descripción</a>
+        <a href="#enlaces">Enlaces</a>
+        <a href="#demos">Demos</a>
+        <a href="#videos">Videos</a>
+        <a href="#contacto">Contacto</a>
+    </nav>
+    <main>
+        <!-- Descripción -->
+        <section id="descripcion">
+            <h2>Descripción del Proyecto</h2>
+            <p>
+                Como resultado principal de este trabajo de fin de grado, se ha construido una aplicación que ha sido diseñada para facilitar la creación y manipulación de objetos geométricos primarios mediante el uso de comandos de voz.
+                Incluye funciones como generación de figuras primitivas geométricas, modificación paramétrica y gestión de objetos ya creados y la posibilidad de guardar y cargar una escena reciente, todo ello usando comandos de voz.
+
+            </p>
+            <p>
+                Dentro de esta aplicación hay dos versiones una para escritorio basada en el reconocimiento de voz que ofrece Web Speech API y otra versión para navegadores de gafas tipo Quest3 que no aceptan la anterior API de reconocimiento de voz mencionada sino que se ha creado un servidor privado que hace el mismo procedimiento pero con otra API de reconocimiento de voz llamada AssemblyAI.
+            </p>
+        </section>
+        <!-- Enlaces -->
+        <section id="enlaces">
+            <h2>Enlaces</h2>
+            <ul>
+                <li>
+                    <a href="https://github.com/R4CC00N/SpeechRecognition_in_Browser" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i> GitHub</a>
+                </li>
+                <li>
+                    <a href="https://r4cc00n.github.io/Memoria/main.pdf" target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> Memoria</a> 
+                </li>
+                <li>
+                    <a href="https://r4cc00n.github.io/Memoria/main.pdf" target="_blank" rel="noopener">
+                    <i class="fas fa-file-powerpoint"></i> Diapositivas</a>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Demos -->
+        <section id="demos">
+            <h2>Sprints</h2>
+            <div class="demo-panel">
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/Demo1_v2.png" alt="Demo 1" class="demo-img">
+                <div class="demo-info">
+                    <h3>Sprint 1: Investigación y Prototipado Inicial</h3>
+                    <p>La primera toma de contacto con el servicio de reconocimiento de voz y del uso complejo en A-Frame.</p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/Sprint3/v1_A-Frame.html')">Ver Demo</button>
+                </div>
+            </div>
+            <div class="demo-panel">
+                <div class="demo-info">
+                    <h3>Sprint 2: Familiarizacion con el desarrollo en A-FRAME Base</h3>
+                    <p>Creación de objetos primitivos, gestionando sus coordenadas de aparición y sus demás propiedades en A-Frame.</p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/Sprint4/Create_Obj_v3.html')">Ver Demo</button>
+                </div>
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/comandoDemo4.png" alt="Demo 1" class="demo-img">
+            </div>
+            <div class="demo-panel">
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/generador_funcional_completo_editar.png" alt="Demo 1" class="demo-img">
+                <div class="demo-info">
+                    <h3>Sprint 3: Funcionalidades y Componentes</h3>
+                    <p>Se crearon diferentes funcionalidades y componentes que se mantuvieron hasta el final del desarollo de la aplicacion.</p>                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/Sprint4/Create_Obj_v3.html')">Ver Demo</button>
+                </div>
+                
+            </div>
+            <div class="demo-panel">
+                
+                <div class="demo-info">
+                    <h3>Sprint 4: Mejora de componentes y Mejora Visual</h3>
+                    <p>Creación de objetos primitivos, gestionando sus coordenadas de aparición y sus demás propiedades en A-Frame.</p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/Sprint8/embed.html')">Ver Demo html embed</button>
+                    <p></p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/DemoEscritorio/')">Ver Demo montada con html embed</button>
+                </div>
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/htmlembed.png" alt="Demo 1" class="demo-img">            </div>            
+            <div class="demo-panel">
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/comandoDemo4.png" alt="Demo 1" class="demo-img">
+                <div class="demo-info">
+                    <h3>Sprint 5: integración Quest3</h3>
+                    <p>Creación de objetos primitivos, gestionando sus coordenadas de aparición y sus demás propiedades en A-Frame.</p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/Sprint4/Create_Obj_v3.html')">Ver Demo</button>
+                </div>
+                
+            </div>            
+            <div class="demo-panel">
+                
+                <div class="demo-info">
+                    <h3>Sprint 6: Demo y unión final</h3>
+                    <p>Creación de objetos primitivos, gestionando sus coordenadas de aparición y sus demás propiedades en A-Frame.</p>
+                    <button onclick="accederDemo('https://r4cc00n.github.io/SpeechRecognition_in_Browser/DemoEscritorio/')">Ver Demo Escritorio</button>
+                    <button onclick="accederDemo('https://github.com/R4CC00N/SpeechRecognition_in_Browser/tree/main/DemoVR')">Ver Demo Gafas VR</button>
+                </div>
+                <img src="https://raw.githubusercontent.com/R4CC00N/Memoria/main/img/crearContenedor.png" alt="Demo 1" class="demo-img">
+            </div>
+
+        </section>
+
+        <!-- Videos -->
+        <section id="videos">
+            <h2>Videos</h2>
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video demo 1" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/oHg5SJYRHA0" title="Video demo 2" allowfullscreen style="margin-top: 1rem;"></iframe>
+        </section>
+        <section id="contacto">
+        <h2>Contacto</h2>
+        <form action="https://formsubmit.co/pablo1998soc@hotmail.com" method="POST">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+
+            <label for="email">Correo electrónico:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="mensaje">Mensaje:</label>
+            <textarea id="mensaje" name="mensaje" rows="5" required></textarea>
+
+            <button type="submit">Enviar</button>
+        </form>
+        </section>
+
+    </main>
+    <script src="script.js"></script>
+    <footer>
+    <p>Edición de Escenas 3D mediante Voz</p>
+    <p>&copy; 2025 Pablo Esteban Camuendo Carlosama-R4CC00N. Todos los derechos reservados.</p>
+    </footer>
+
 </body>
 </html>
